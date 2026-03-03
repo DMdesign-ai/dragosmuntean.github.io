@@ -4,47 +4,54 @@ import { InputHandler } from '../../lib/game/input';
 
 export default function GameWorld() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const parent = canvas.parentElement!;
-
-    const resize = () => {
-      canvas.width = parent.clientWidth;
-      canvas.height = parent.clientHeight;
-    };
-    resize();
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
 
     const input = new InputHandler();
-    let cleanup = createGameLoop(ctx, canvas.width, canvas.height, input);
+    let gameCleanup: (() => void) | null = null;
 
-    const handleResize = () => {
-      resize();
+    const startGame = (width: number, height: number) => {
+      if (gameCleanup) gameCleanup();
+      canvas.width = width;
+      canvas.height = height;
       ctx.imageSmoothingEnabled = false;
-      cleanup();
-      cleanup = createGameLoop(ctx, canvas.width, canvas.height, input);
+      gameCleanup = createGameLoop(ctx, width, height, input);
     };
 
-    window.addEventListener('resize', handleResize);
+    // Use ResizeObserver to track the container size reliably
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          startGame(Math.floor(width), Math.floor(height));
+        }
+      }
+    });
+
+    observer.observe(container);
 
     return () => {
-      cleanup();
+      observer.disconnect();
+      if (gameCleanup) gameCleanup();
       input.destroy();
-      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full block cursor-crosshair"
-      tabIndex={0}
-      aria-label="Side-scrolling platformer game"
-    />
+    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', width: '100%', height: '100%' }}
+        tabIndex={0}
+        aria-label="Side-scrolling platformer game"
+      />
+    </div>
   );
 }
