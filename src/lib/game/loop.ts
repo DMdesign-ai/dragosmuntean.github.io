@@ -1,12 +1,11 @@
-import { PHYSICS } from '../gameConstants';
-import { GAME } from '../gameConstants';
+import { PHYSICS, GAME } from '../gameConstants';
 import type { InputHandler } from './input';
 import {
-  createPlatforms,
-  createCoins,
+  createObstacle,
+  createCoin,
   createStars,
   createPlayer,
-  type Platform,
+  type Obstacle,
   type Coin,
   type Star,
   type PlayerState,
@@ -14,106 +13,207 @@ import {
 import {
   drawBackground,
   drawStars,
-  drawPlatform,
+  drawLaneLines,
+  drawObstacle,
   drawCoin,
   drawPlayer,
+  drawGameOver,
+  drawScoreHUD,
 } from './renderer';
 
 interface GameState {
-  platforms: Platform[];
+  obstacles: Obstacle[];
   coins: Coin[];
   stars: Star[];
   player: PlayerState;
   score: number;
+  highScore: number;
+  scrollSpeed: number;
+  scrollOffset: number;
+  spawnTimer: number;
+  coinSpawnTimer: number;
+  frameCount: number;
+  gameOver: boolean;
+  started: boolean;
 }
 
-function initGameState(width: number, height: number): GameState {
-  const platforms = createPlatforms(width, height);
+function initGameState(width: number, height: number, prevHighScore: number = 0): GameState {
   return {
-    platforms,
-    coins: createCoins(platforms),
+    obstacles: [],
+    coins: [],
     stars: createStars(width, height, GAME.starCount),
     player: createPlayer(width, height),
     score: 0,
+    highScore: prevHighScore,
+    scrollSpeed: PHYSICS.baseScrollSpeed,
+    scrollOffset: 0,
+    spawnTimer: 0,
+    coinSpawnTimer: 0,
+    frameCount: 0,
+    gameOver: false,
+    started: false,
   };
 }
 
 function update(state: GameState, input: InputHandler, width: number, height: number) {
-  const { player, platforms, coins } = state;
+  // Wait for first input to start the game
+  if (!state.started) {
+    if (input.left || input.right || input.up || input.down) {
+      state.started = true;
+    }
+    return;
+  }
 
-  // Horizontal movement
+  // Game over — wait for restart
+  if (state.gameOver) {
+    if (input.restart) {
+      // Reset but keep high score
+      const hs = state.highScore;
+      const stars = state.stars;
+      Object.assign(state, initGameState(width, height, hs));
+      state.stars = stars; // reuse stars
+      state.started = true;
+    }
+    return;
+  }
+
+  state.frameCount++;
+
+  // Gradually increase speed
+  state.scrollSpeed = Math.min(
+    PHYSICS.maxScrollSpeed,
+    PHYSICS.baseScrollSpeed + state.frameCount * PHYSICS.speedIncreaseRate,
+  );
+
+  // Update scroll offset for lane line animation
+  state.scrollOffset += state.scrollSpeed;
+
+  // Score = distance in meters
+  state.score = Math.floor(state.frameCount / 6);
+
+  // --- Player movement ---
+  const p = state.player;
+
+  // Invincibility countdown
+  if (p.invincibleTimer > 0) {
+    p.invincibleTimer -= 1;
+  }
+
   if (input.left) {
-    player.velocityX = -PHYSICS.moveSpeed;
-    player.facing = 'left';
-  } else if (input.right) {
-    player.velocityX = PHYSICS.moveSpeed;
-    player.facing = 'right';
-  } else {
-    player.velocityX *= 0.8;
-    if (Math.abs(player.velocityX) < 0.1) player.velocityX = 0;
+    p.x -= PHYSICS.playerSpeed;
+  }
+  if (input.right) {
+    p.x += PHYSICS.playerSpeed;
+  }
+  if (input.up) {
+    p.y -= PHYSICS.playerVerticalSpeed;
+  }
+  if (input.down) {
+    p.y += PHYSICS.playerVerticalSpeed;
   }
 
-  // Jump
-  if (input.jump && player.isGrounded) {
-    player.velocityY = PHYSICS.jumpForce;
-    player.isGrounded = false;
+  // Clamp player to screen bounds
+  if (p.x < 6) p.x = 6;
+  if (p.x + p.width > width - 6) p.x = width - 6 - p.width;
+  if (p.y < 30) p.y = 30; // leave room for HUD
+  if (p.y + p.height > height - 4) p.y = height - 4 - p.height;
+
+  // Run animation
+  p.animTimer += 1;
+  if (p.animTimer > 6) {
+    p.animFrame = (p.animFrame + 1) % 2;
+    p.animTimer = 0;
   }
 
-  // Gravity
-  player.velocityY += PHYSICS.gravity;
-  if (player.velocityY > PHYSICS.maxFallSpeed) {
-    player.velocityY = PHYSICS.maxFallSpeed;
+  // --- Spawn obstacles ---
+  state.spawnTimer++;
+  const currentSpawnInterval = Math.max(
+    GAME.minSpawnInterval,
+    GAME.spawnInterval - Math.floor(state.frameCount / 120),
+  );
+
+  if (state.spawnTimer >= currentSpawnInterval) {
+    state.spawnTimer = 0;
+    const newObs = createObstacle(width, state.scrollSpeed);
+
+    // Make sure new obstacle doesn't overlap existing ones near the top
+    const tooClose = state.obstacles.some(
+      (o) =>
+        o.y < GAME.obstacleMinGap &&
+        Math.abs(o.x - newObs.x) < o.width + 10,
+    );
+
+    if (!tooClose) {
+      state.obstacles.push(newObs);
+    }
   }
 
-  // Apply velocity
-  player.x += player.velocityX;
-  player.y += player.velocityY;
+  // --- Spawn coins ---
+  state.coinSpawnTimer++;
+  if (state.coinSpawnTimer > currentSpawnInterval * 2 && Math.random() < GAME.coinChance) {
+    state.coinSpawnTimer = 0;
+    state.coins.push(createCoin(width));
+  }
 
-  // Platform collision (only when falling)
-  player.isGrounded = false;
-  if (player.velocityY >= 0) {
-    for (const platform of platforms) {
-      if (
-        player.x + player.width > platform.x &&
-        player.x < platform.x + platform.width &&
-        player.y + player.height >= platform.y &&
-        player.y + player.height <= platform.y + platform.height + player.velocityY + 2
-      ) {
-        player.y = platform.y - player.height;
-        player.velocityY = 0;
-        player.isGrounded = true;
+  // --- Move obstacles downward ---
+  for (const obs of state.obstacles) {
+    obs.y += state.scrollSpeed * obs.speed;
+  }
+
+  // --- Move coins downward ---
+  for (const coin of state.coins) {
+    coin.y += state.scrollSpeed * coin.speed;
+  }
+
+  // --- Remove off-screen obstacles and coins ---
+  state.obstacles = state.obstacles.filter((o) => o.y < height + 20);
+  state.coins = state.coins.filter((c) => c.y < height + 20 && !c.collected);
+
+  // --- Move stars slowly for parallax ---
+  for (const star of state.stars) {
+    star.y += state.scrollSpeed * 0.15;
+    if (star.y > height) {
+      star.y = -2;
+      star.x = Math.random() * width;
+    }
+  }
+
+  // --- Collision detection (AABB with shrunk hitbox for fairness) ---
+  if (p.invincibleTimer <= 0) {
+    const hitboxShrink = 6; // pixels of forgiveness on each side
+    const px1 = p.x + hitboxShrink;
+    const py1 = p.y + hitboxShrink;
+    const px2 = p.x + p.width - hitboxShrink;
+    const py2 = p.y + p.height - hitboxShrink;
+
+    for (const obs of state.obstacles) {
+      const ox1 = obs.x + 2;
+      const oy1 = obs.y + 2;
+      const ox2 = obs.x + obs.width - 2;
+      const oy2 = obs.y + obs.height - 2;
+
+      if (px1 < ox2 && px2 > ox1 && py1 < oy2 && py2 > oy1) {
+        // Collision!
+        state.gameOver = true;
+        p.alive = false;
+        if (state.score > state.highScore) {
+          state.highScore = state.score;
+        }
         break;
       }
     }
   }
 
-  // Screen bounds
-  if (player.x < 0) player.x = 0;
-  if (player.x + player.width > width) player.x = width - player.width;
-  if (player.y > height) {
-    // Fell off — reset to ground
-    player.y = height - 40 - player.height;
-    player.velocityY = 0;
-    player.isGrounded = true;
-  }
-
-  // Coin collection
-  for (const coin of coins) {
-    if (coin.collected) continue;
-    const dx = (player.x + player.width / 2) - coin.x;
-    const dy = (player.y + player.height / 2) - coin.y;
-    if (Math.sqrt(dx * dx + dy * dy) < 20) {
-      coin.collected = true;
-      state.score += 100;
-    }
-  }
-
-  // Animation timer
-  if (Math.abs(player.velocityX) > 0.5) {
-    player.animTimer += 1;
-    if (player.animTimer > 8) {
-      player.animFrame = (player.animFrame + 1) % 2;
-      player.animTimer = 0;
+  // --- Coin collection ---
+  if (p.alive) {
+    for (const coin of state.coins) {
+      if (coin.collected) continue;
+      const dx = p.x + p.width / 2 - (coin.x + 8);
+      const dy = p.y + p.height / 2 - (coin.y + 8);
+      if (Math.sqrt(dx * dx + dy * dy) < 24) {
+        coin.collected = true;
+        state.score += 50;
+      }
     }
   }
 }
@@ -126,9 +226,12 @@ function render(
 ) {
   drawBackground(ctx, width, height);
   drawStars(ctx, state.stars);
+  drawLaneLines(ctx, width, height, state.scrollOffset);
 
-  // Draw platforms
-  state.platforms.forEach((p, i) => drawPlatform(ctx, p, i === 0));
+  // Draw obstacles
+  for (const obs of state.obstacles) {
+    drawObstacle(ctx, obs);
+  }
 
   // Draw coins
   for (const coin of state.coins) {
@@ -137,6 +240,23 @@ function render(
 
   // Draw player
   drawPlayer(ctx, state.player);
+
+  // Draw HUD
+  drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
+
+  // Pre-start prompt
+  if (!state.started) {
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('[ARROWS] TO RUN', width / 2, height / 2);
+    ctx.textAlign = 'start';
+  }
+
+  // Game over overlay
+  if (state.gameOver) {
+    drawGameOver(ctx, width, height, state.score, state.highScore);
+  }
 }
 
 export function createGameLoop(
