@@ -1,0 +1,24 @@
+---
+import type { LinkedInPost } from '../../lib/types';
+
+interface Props {
+  post: LinkedInPost;
+}
+
+const { post } = Astro.props;
+const scrollLabel = `SCROLL_0${post.scrollNumber}`;
+---
+
+<div class="bg-card-bg border-l-2 border-card-border p-3 mb-3" data-animate="card">
+  <div class="flex justify-between items-start">
+    <span class="text-xs text-muted">📜 [{scrollLabel}]</span>
+    <span class="text-terminal-green text-xs">+{post.points} PTS</span>
+  </div>
+  <h3 class="font-bold text-sm mt-1 text-terminal-green">{post.title}</h3>
+  <p class="text-muted text-xs mt-1 leading-relaxed">{post.description}</p>
+  <div class="flex items-center gap-2 mt-2 text-xs text-muted">
+    <span>{post.likes}</span>
+    <span class="text-red-accent">♥</span>
+    <span>{post.comments} comments</span>
+  </div>
+</div>

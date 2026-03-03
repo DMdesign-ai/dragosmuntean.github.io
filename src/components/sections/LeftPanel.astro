@@ -1,0 +1,20 @@
+---
+import HeroBlock from './HeroBlock.astro';
+import ProjectCard from './ProjectCard.astro';
+import { projects } from '../../lib/data';
+---
+
+<aside class="w-[28%] h-full overflow-y-auto p-5 border-r border-hud-border shrink-0">
+  <HeroBlock />
+
+  <div class="mt-8">
+    <h2 class="text-center text-muted text-xs tracking-widest mb-4">--- PROJECTS ---</h2>
+    {projects.map((project) => (
+      <ProjectCard project={project} />
+    ))}
+  </div>
+
+  <div class="mt-6 text-xs text-muted">
+    ITEMS: 0/10&nbsp;&nbsp;COINS: 0
+  </div>
+</aside>

@@ -1,0 +1,26 @@
+---
+import { socialLinks, stats } from '../../lib/data';
+---
+
+<footer class="h-10 flex items-center justify-between border-t border-hud-border px-4 shrink-0 text-xs">
+  <div class="flex items-center gap-4">
+    <span>TOTAL_SCORE: <span class="text-terminal-green" data-total-score>99,999</span></span>
+    <span>DIST: <span class="text-terminal-green">{stats.distance}</span></span>
+    <span>ITEMS: <span class="text-terminal-green">{stats.items}</span></span>
+  </div>
+
+  <span class="blink">[INSERT COIN]</span>
+
+  <div class="flex items-center gap-4">
+    {socialLinks.map((link) => (
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-muted hover:text-terminal-green transition-colors text-xs"
+      >
+        {link.name}
+      </a>
+    ))}
+  </div>
+</footer>

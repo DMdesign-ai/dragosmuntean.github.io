@@ -1,0 +1,13 @@
+---
+interface Props {
+  percent: number;
+  color: 'gold' | 'red';
+}
+
+const { percent, color } = Astro.props;
+const barClass = color === 'gold' ? 'bg-gold' : 'bg-red-accent';
+---
+
+<div class="w-full h-2 bg-card-border mt-2">
+  <div class:list={['h-full', barClass]} style={`width: ${percent}%`} />
+</div>

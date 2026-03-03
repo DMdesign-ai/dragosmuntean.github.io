@@ -1,0 +1,15 @@
+---
+interface Props {
+  type: 'code' | 'box' | 'terminal';
+}
+
+const { type } = Astro.props;
+
+const icons: Record<string, string> = {
+  code: '<>',
+  box: '⊟',
+  terminal: '>_',
+};
+---
+
+<span class="text-terminal-green text-sm font-bold whitespace-nowrap">{icons[type]}</span>

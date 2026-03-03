@@ -1,12 +1,69 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import TopHUD from '../components/sections/TopHUD.astro';
+import BottomStatusBar from '../components/sections/BottomStatusBar.astro';
+import LeftPanel from '../components/sections/LeftPanel.astro';
+import RightPanel from '../components/sections/RightPanel.astro';
+import GameWorld from '../components/sections/GameWorld';
 ---
 
-<BaseLayout title="Dragos Muntean — Portfolio">
-  <main>
-    <!-- Hero Section -->
-    <section id="hero" class="min-h-screen flex items-center justify-center">
-      <h1 class="text-6xl font-bold">Dragos Muntean</h1>
-    </section>
-  </main>
+<BaseLayout title="RUNNER_PORTFOLIO.EXE — Dragos Muntean">
+  <div class="h-screen flex flex-col">
+    <TopHUD />
+
+    <main class="flex-1 flex min-h-0">
+      <LeftPanel />
+
+      <div class="flex-1 min-w-0 relative bg-game-bg">
+        <GameWorld client:only="react" />
+      </div>
+
+      <RightPanel />
+    </main>
+
+    <BottomStatusBar />
+  </div>
 </BaseLayout>
+
+<script>
+  import gsap from 'gsap';
+
+  // Card entrance animations
+  gsap.from('[data-animate="card"]', {
+    opacity: 0,
+    y: 20,
+    stagger: 0.08,
+    duration: 0.4,
+    ease: 'power2.out',
+    delay: 0.3,
+  });
+
+  // Score counter animation
+  const scoreEl = document.querySelector('[data-score]');
+  if (scoreEl) {
+    const target = { val: 0 };
+    gsap.to(target, {
+      val: 99999,
+      duration: 2.5,
+      ease: 'power1.inOut',
+      delay: 0.5,
+      onUpdate() {
+        scoreEl.textContent = String(Math.floor(target.val)).padStart(5, '0');
+      },
+    });
+  }
+
+  // HUD fade-in
+  gsap.from('header', {
+    opacity: 0,
+    duration: 0.6,
+    ease: 'power2.out',
+  });
+
+  gsap.from('footer', {
+    opacity: 0,
+    duration: 0.6,
+    ease: 'power2.out',
+    delay: 0.2,
+  });
+</script>

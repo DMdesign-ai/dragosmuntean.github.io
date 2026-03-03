@@ -1,0 +1,27 @@
+---
+import type { AIBoss } from '../../lib/types';
+import ProgressBar from '../ui/ProgressBar.astro';
+
+interface Props {
+  boss: AIBoss;
+}
+
+const { boss } = Astro.props;
+const bossLabel = boss.isFinalBoss ? 'FINAL_BOSS' : `BOSS_0${boss.bossNumber}`;
+const labelClass = boss.isFinalBoss ? 'text-red-accent' : 'text-muted';
+const borderClass = boss.isFinalBoss ? 'border-red-accent' : 'border-card-border';
+---
+
+<div class:list={['bg-card-bg border-l-2 p-3 mb-3', borderClass]} data-animate="card">
+  <div class="flex justify-between items-start">
+    <span class:list={['text-xs', labelClass]}>
+      ⊕ [{bossLabel}] <span class="text-terminal-green font-bold">{boss.name}</span>
+    </span>
+    <span class="text-terminal-green text-xs">+{boss.xp} XP</span>
+  </div>
+  <p class="text-muted text-xs mt-1">
+    {boss.description} — {boss.techStack}
+    {boss.isFinalBoss && <span class="text-red-accent ml-1">[LEGENDARY]</span>}
+  </p>
+  <ProgressBar percent={boss.hpPercent} color={boss.barColor} />
+</div>

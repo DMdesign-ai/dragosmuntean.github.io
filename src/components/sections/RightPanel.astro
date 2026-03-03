@@ -1,0 +1,25 @@
+---
+import LinkedInCard from './LinkedInCard.astro';
+import BossCard from './BossCard.astro';
+import { linkedInPosts, aiBosses } from '../../lib/data';
+---
+
+<aside class="w-[34%] h-full overflow-y-auto p-5 border-l border-hud-border shrink-0">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-muted text-xs tracking-widest">--- LINKEDIN POSTS ---</h2>
+    <span class="text-terminal-green text-xs">SCROLLS: 0/3</span>
+  </div>
+
+  {linkedInPosts.map((post) => (
+    <LinkedInCard post={post} />
+  ))}
+
+  <div class="flex justify-between items-center mt-8 mb-4">
+    <h2 class="text-red-accent text-xs tracking-widest font-bold">!! BOSS ZONE: AI PROJECTS !!</h2>
+    <span class="text-terminal-green text-xs">BOSSES: 0/4</span>
+  </div>
+
+  {aiBosses.map((boss) => (
+    <BossCard boss={boss} />
+  ))}
+</aside>

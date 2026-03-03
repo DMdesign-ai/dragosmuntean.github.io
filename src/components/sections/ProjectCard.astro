@@ -1,0 +1,22 @@
+---
+import type { Project } from '../../lib/types';
+import PixelIcon from '../ui/PixelIcon.astro';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+---
+
+<div class="bg-card-bg border-l-2 border-card-border p-3 mb-3 hover:border-terminal-green transition-colors" data-animate="card">
+  <div class="flex items-start justify-between">
+    <div class="flex items-center gap-2">
+      <PixelIcon type={project.icon} />
+      <span class="font-bold text-sm text-terminal-green">{project.name}</span>
+    </div>
+    <span class="text-terminal-green text-xs">+{project.points} PTS</span>
+  </div>
+  <p class="text-muted text-xs mt-1">{project.description}</p>
+  <span class="text-terminal-green text-xs mt-2 inline-block font-bold">[{project.techTag}]</span>
+</div>

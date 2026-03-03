@@ -1,1 +1,64 @@
 @import "tailwindcss";
+
+@theme {
+  --color-game-bg: #0a0e0a;
+  --color-terminal-green: #00ff41;
+  --color-terminal-dim: #00cc33;
+  --color-terminal-glow: #00ff4133;
+  --color-card-bg: #0f150f;
+  --color-card-border: #1a2a1a;
+  --color-hud-border: #1a2a1a;
+  --color-muted: #6b7280;
+  --color-muted-green: #3a5a3a;
+  --color-red-accent: #ff0040;
+  --color-gold: #ffd700;
+  --color-platform-brown: #8b6914;
+  --color-star-gray: #4a4a4a;
+
+  --font-mono: 'Share Tech Mono', ui-monospace, 'Courier New', monospace;
+  --font-pixel: 'Press Start 2P', 'Share Tech Mono', monospace;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-mono);
+    background-color: var(--color-game-bg);
+    color: var(--color-terminal-green);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-game-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-card-border);
+  }
+}
+
+@keyframes blink-keyframe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { text-shadow: 0 0 4px var(--color-terminal-glow); }
+  50% { text-shadow: 0 0 12px var(--color-terminal-glow), 0 0 20px var(--color-terminal-glow); }
+}
+
+@utility blink {
+  animation: blink-keyframe 1s step-end infinite;
+}
+
+@utility text-glow {
+  text-shadow: 0 0 10px var(--color-terminal-glow);
+}
+
+@utility text-glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
