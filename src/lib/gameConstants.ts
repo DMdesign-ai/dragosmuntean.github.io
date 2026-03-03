@@ -1,27 +1,41 @@
 export const COLORS = {
   bg: '#0a0e0a',
   star: '#4a4a4a',
-  platformTop: '#5a7a2a',
-  platformBody: '#8B6914',
-  platformDark: '#6b4f10',
+  // Road / lane colors
+  roadBg: '#0f150f',
+  laneLine: '#1a2a1a',
+  laneLineBright: '#2a3a2a',
+  // Obstacle colors
+  obstacleRock: '#8B6914',
+  obstacleRockDark: '#6b4f10',
+  obstacleSpike: '#ff0040',
+  obstacleSpikeDark: '#cc0033',
+  obstacleBarrier: '#3a5a3a',
+  obstacleBarrierBright: '#5a7a2a',
+  // Collectible
   coin: '#ffd700',
   coinShadow: '#b8960f',
-  ground: '#8B6914',
-  groundTop: '#5a7a2a',
-  groundDirt: '#6b4f10',
+  // HUD
+  scoreText: '#00ff41',
+  gameOverText: '#ff0040',
 } as const;
 
 export const PHYSICS = {
-  gravity: 0.5,
-  jumpForce: -10,
-  moveSpeed: 3,
-  maxFallSpeed: 8,
+  playerSpeed: 4,
+  playerVerticalSpeed: 3,
+  baseScrollSpeed: 2.5,
+  maxScrollSpeed: 8,
+  speedIncreaseRate: 0.0005, // per frame
 } as const;
 
 export const GAME = {
-  starCount: 40,
-  platformCount: 6,
-  coinSize: 8,
+  starCount: 50,
   playerSize: 24,
-  groundHeight: 40,
+  obstacleMinGap: 60,       // min vertical gap between obstacles
+  spawnInterval: 45,         // frames between obstacle spawns (decreases over time)
+  minSpawnInterval: 18,      // fastest spawn rate
+  coinChance: 0.3,           // chance to spawn a coin between obstacles
+  laneLineSpacing: 32,       // vertical spacing of lane dashes
+  laneLineWidth: 2,
+  laneLineDashLength: 12,
 } as const;
