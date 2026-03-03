@@ -5,7 +5,8 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://dragosmuntean.com',
+  site: 'https://dmdesign-ai.github.io',
+  base: '/dragosmuntean.github.io',
   output: 'static',
 
   vite: {
