@@ -1,5 +1,11 @@
 ---
 import BlinkingCursor from '../ui/BlinkingCursor.astro';
+
+interface Props {
+  mobile?: boolean;
+}
+
+const { mobile = false } = Astro.props;
 ---
 
 <div class="space-y-4">
@@ -7,5 +13,9 @@ import BlinkingCursor from '../ui/BlinkingCursor.astro';
     RUNNER_<br />PORTFOLIO.EXE
   </h1>
   <p class="text-muted text-xs italic">Running with curiosity,<br />Designing to discover.</p>
-  <p class="text-muted text-xs">// USE [ARROW KEYS] TO EXPLORE<BlinkingCursor /></p>
+  {mobile ? (
+    <p class="text-muted text-xs">// SWIPE OR TAP TO PLAY<BlinkingCursor /></p>
+  ) : (
+    <p class="text-muted text-xs">// USE [ARROW KEYS] TO EXPLORE<BlinkingCursor /></p>
+  )}
 </div>

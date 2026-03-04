@@ -32,7 +32,7 @@ export default function GameWorld() {
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
 
-    const input = new InputHandler();
+    const input = new InputHandler(canvas);
 
     const startGame = (width: number, height: number) => {
       if (gameHandleRef.current) gameHandleRef.current.cleanup();

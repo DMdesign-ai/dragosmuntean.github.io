@@ -1,0 +1,14 @@
+---
+import LinkedInCard from './LinkedInCard.astro';
+import { blogArticles } from '../../lib/data';
+---
+
+<section class="px-4 py-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-muted text-xs tracking-widest">--- BLOG POSTS ---</h2>
+    <span class="text-terminal-green text-xs">POSTS: {blogArticles.length}</span>
+  </div>
+  {blogArticles.map((article, i) => (
+    <LinkedInCard article={article} index={i} />
+  ))}
+</section>

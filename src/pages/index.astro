@@ -4,21 +4,50 @@ import TopHUD from '../components/sections/TopHUD.astro';
 import BottomStatusBar from '../components/sections/BottomStatusBar.astro';
 import LeftPanel from '../components/sections/LeftPanel.astro';
 import RightPanel from '../components/sections/RightPanel.astro';
-import GameWorld from '../components/sections/GameWorld';
+import HeroBlock from '../components/sections/HeroBlock.astro';
+import ProjectsSection from '../components/sections/ProjectsSection.astro';
+import BlogSection from '../components/sections/BlogSection.astro';
+import AIBossSection from '../components/sections/AIBossSection.astro';
+import RunnerStats from '../components/sections/RunnerStats.astro';
+import ResponsiveGameMount from '../components/sections/ResponsiveGameMount';
 ---
 
 <BaseLayout title="RUNNER_PORTFOLIO.EXE — Dragos Muntean" bodyClass="homepage-lock">
-  <div class="h-screen flex flex-col">
+  <div class="md:h-screen md:flex md:flex-col">
     <TopHUD />
 
-    <main class="flex-1 flex min-h-0">
+    <!-- DESKTOP: 3-column layout (hidden on mobile) -->
+    <main class="hidden md:flex flex-1 min-h-0">
       <LeftPanel />
 
       <div class="flex-1 min-w-0 relative bg-game-bg">
-        <GameWorld client:only="react" />
+        <ResponsiveGameMount layout="desktop" client:only="react" />
       </div>
 
       <RightPanel />
+    </main>
+
+    <!-- MOBILE: stacked single-column layout (hidden on desktop) -->
+    <main class="flex flex-col md:hidden">
+      <!-- 1. Hero + Game -->
+      <div class="px-4 pt-4 pb-2">
+        <HeroBlock mobile />
+      </div>
+      <div class="w-full aspect-[3/4] max-h-[70vh] relative bg-game-bg">
+        <ResponsiveGameMount layout="mobile" client:only="react" />
+      </div>
+
+      <!-- 2. Projects -->
+      <ProjectsSection />
+
+      <!-- 3. Blog -->
+      <BlogSection />
+
+      <!-- 4. AI (under construction) -->
+      <AIBossSection />
+
+      <!-- 5. Runner Stats -->
+      <RunnerStats />
     </main>
 
     <BottomStatusBar />

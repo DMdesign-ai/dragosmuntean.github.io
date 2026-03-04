@@ -11,6 +11,10 @@ import type { Obstacle, Coin, Star, PlayerState, Door } from './entities';
 import type { GameMode } from './modes';
 import { MODE_CONFIGS } from './modes';
 
+const isTouchDevice =
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
 export function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, width, height);
@@ -257,7 +261,7 @@ export function drawGameOver(
 
   ctx.fillStyle = COLORS.scoreText;
   ctx.font = '8px "Press Start 2P", monospace';
-  ctx.fillText('[SPACE] TO RETRY', width / 2, height / 2 + 60);
+  ctx.fillText(isTouchDevice ? '[TAP] TO RETRY' : '[SPACE] TO RETRY', width / 2, height / 2 + 60);
 
   ctx.textAlign = 'start';
 }
@@ -433,8 +437,8 @@ export function drawCharacterSelect(
     ctx.font = `${promptSize}px "Press Start 2P", monospace`;
     ctx.textAlign = 'center';
     const promptY = boxY + boxH + 30;
-    ctx.fillText('[LEFT/RIGHT] SELECT', width / 2, promptY);
-    ctx.fillText('[SPACE] START', width / 2, promptY + promptSize + 10);
+    ctx.fillText(isTouchDevice ? '[SWIPE] SELECT' : '[LEFT/RIGHT] SELECT', width / 2, promptY);
+    ctx.fillText(isTouchDevice ? '[TAP] START' : '[SPACE] START', width / 2, promptY + promptSize + 10);
   }
 
   ctx.textAlign = 'start';

@@ -3,13 +3,15 @@ import { socialLinks, stats } from '../../lib/data';
 ---
 
 <footer class="h-10 flex items-center justify-between border-t border-hud-border px-4 shrink-0 text-xs">
-  <div class="flex items-center gap-4">
+  <!-- Stats: hidden on mobile -->
+  <div class="hidden sm:flex items-center gap-4">
     <span>TOTAL_SCORE: <span class="text-terminal-green" data-total-score>99,999</span></span>
     <span>DIST: <span class="text-terminal-green">{stats.distance}</span></span>
     <span>ITEMS: <span class="text-terminal-green">{stats.items}</span></span>
   </div>
 
-  <span class="blink">[INSERT COIN]</span>
+  <!-- INSERT COIN: visible on mobile (left-aligned via order) -->
+  <span class="blink sm:order-none">[INSERT COIN]</span>
 
   <div class="flex items-center gap-4">
     {socialLinks.map((link) => (
