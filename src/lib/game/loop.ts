@@ -455,13 +455,34 @@ export function createGameLoop(
   let animId: number;
   let running = true;
 
-  function tick() {
+  // Fixed-timestep loop: always tick at 60fps regardless of monitor refresh rate.
+  // High-refresh-rate monitors (120Hz, 144Hz) would otherwise run the game 2x+ faster
+  // because all movement is frame-based, not time-based.
+  const TARGET_FPS = 60;
+  const FRAME_DURATION = 1000 / TARGET_FPS; // ~16.67ms
+  let lastTime = 0;
+  let accumulator = 0;
+
+  function tick(timestamp: number) {
     if (!running) return;
-    update(state, input, width, height, projects, callbacks);
-    render(ctx, state, width, height);
-    if (state.navigating) {
-      state.frameCount++;
+
+    if (lastTime === 0) lastTime = timestamp;
+    const delta = timestamp - lastTime;
+    lastTime = timestamp;
+
+    // Cap accumulated time to prevent spiral of death after tab-switch
+    accumulator += Math.min(delta, 200);
+
+    // Run fixed-step updates for each ~16.67ms that has elapsed
+    while (accumulator >= FRAME_DURATION) {
+      update(state, input, width, height, projects, callbacks);
+      if (state.navigating) {
+        state.frameCount++;
+      }
+      accumulator -= FRAME_DURATION;
     }
+
+    render(ctx, state, width, height);
     animId = requestAnimationFrame(tick);
   }
 
