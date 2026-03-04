@@ -1,10 +1,12 @@
 export interface Project {
   id: string;
+  slug: string;
   name: string;
   description: string;
   points: number;
   techTag: string;
   icon: 'code' | 'box' | 'terminal';
+  category: 'work' | 'personal';
 }
 
 export interface LinkedInPost {
