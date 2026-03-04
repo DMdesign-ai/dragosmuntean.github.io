@@ -10,6 +10,11 @@ export class InputHandler {
   private touchCurrentY = 0;
   private readonly TOUCH_DEAD_ZONE = 15;
 
+  // Tap position in canvas-local coordinates (set on tap, consumed by game loop)
+  lastTapX: number | null = null;
+  lastTapY: number | null = null;
+
+  private canvasEl: HTMLElement | null;
   private touchTarget: EventTarget;
 
   private onKeyDown: (e: KeyboardEvent) => void;
@@ -19,6 +24,8 @@ export class InputHandler {
   private onTouchEnd: (e: TouchEvent) => void;
 
   constructor(canvas?: HTMLElement) {
+    this.canvasEl = canvas || null;
+
     this.onKeyDown = (e: KeyboardEvent) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter', 'Escape'].includes(e.key)) {
         e.preventDefault();
@@ -56,8 +63,16 @@ export class InputHandler {
     };
 
     this.onTouchEnd = () => {
-      // Tap (no swipe) = confirm / restart
       if (this.touchActive && !this.isSwiping) {
+        // Record tap position in canvas-local coordinates
+        if (this.canvasEl) {
+          const rect = this.canvasEl.getBoundingClientRect();
+          const scaleX = (this.canvasEl as HTMLCanvasElement).width / rect.width;
+          const scaleY = (this.canvasEl as HTMLCanvasElement).height / rect.height;
+          this.lastTapX = (this.touchStartX - rect.left) * scaleX;
+          this.lastTapY = (this.touchStartY - rect.top) * scaleY;
+        }
+        // Also fire confirm keys for non-selection-screen actions (restart, etc.)
         this.keys[' '] = true;
         this.keys['Enter'] = true;
         setTimeout(() => {
@@ -76,6 +91,17 @@ export class InputHandler {
     this.touchTarget.addEventListener('touchstart', this.onTouchStart as EventListener, { passive: false });
     this.touchTarget.addEventListener('touchmove', this.onTouchMove as EventListener, { passive: false });
     this.touchTarget.addEventListener('touchend', this.onTouchEnd as EventListener);
+  }
+
+  /** Consume the last tap position (returns it and clears it). */
+  consumeTap(): { x: number; y: number } | null {
+    if (this.lastTapX !== null && this.lastTapY !== null) {
+      const tap = { x: this.lastTapX, y: this.lastTapY };
+      this.lastTapX = null;
+      this.lastTapY = null;
+      return tap;
+    }
+    return null;
   }
 
   get left(): boolean {

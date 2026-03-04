@@ -163,7 +163,7 @@ function update(
       state.selectDebounce--;
     }
 
-    // Left/right to toggle selection
+    // Left/right to toggle selection (keyboard / swipe)
     if (state.selectDebounce === 0) {
       if (input.left && state.selectIndex > 0) {
         state.selectIndex = 0;
@@ -175,7 +175,39 @@ function update(
       }
     }
 
-    // Confirm selection
+    // Tap-to-select: detect which mode box was tapped and start immediately
+    const tap = input.consumeTap();
+    if (tap) {
+      // Recompute box bounds (must match drawCharacterSelect in renderer.ts)
+      const gap = Math.max(24, Math.floor(width * 0.06));
+      const boxW = Math.max(120, Math.floor((width - gap * 3) / 2));
+      const boxH = Math.max(140, Math.floor(height * 0.48));
+      const totalW = boxW * 2 + gap;
+      const startX = (width - totalW) / 2;
+      const boxY = Math.floor(height * 0.22);
+
+      const box0x = startX;
+      const box1x = startX + boxW + gap;
+
+      let tappedIndex = -1;
+      if (tap.x >= box0x && tap.x <= box0x + boxW && tap.y >= boxY && tap.y <= boxY + boxH) {
+        tappedIndex = 0;
+      } else if (tap.x >= box1x && tap.x <= box1x + boxW && tap.y >= boxY && tap.y <= boxY + boxH) {
+        tappedIndex = 1;
+      }
+
+      if (tappedIndex >= 0) {
+        state.selectIndex = tappedIndex;
+        state.selectedMode = tappedIndex === 0 ? 'road' : 'trail';
+        state.phase = 'playing';
+        state.started = true;
+        input.keys['Enter'] = false;
+        input.keys[' '] = false;
+        return;
+      }
+    }
+
+    // Confirm selection (keyboard: Space/Enter)
     if (input.confirm) {
       state.selectedMode = state.selectIndex === 0 ? 'road' : 'trail';
       state.phase = 'playing';

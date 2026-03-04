@@ -437,8 +437,10 @@ export function drawCharacterSelect(
     ctx.font = `${promptSize}px "Press Start 2P", monospace`;
     ctx.textAlign = 'center';
     const promptY = boxY + boxH + 30;
-    ctx.fillText(isTouchDevice ? '[SWIPE] SELECT' : '[LEFT/RIGHT] SELECT', width / 2, promptY);
-    ctx.fillText(isTouchDevice ? '[TAP] START' : '[SPACE] START', width / 2, promptY + promptSize + 10);
+    ctx.fillText(isTouchDevice ? '[TAP] A MODE TO START' : '[LEFT/RIGHT] SELECT', width / 2, promptY);
+    if (!isTouchDevice) {
+      ctx.fillText('[SPACE] START', width / 2, promptY + promptSize + 10);
+    }
   }
 
   ctx.textAlign = 'start';
