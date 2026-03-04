@@ -13,12 +13,16 @@ const href = `${import.meta.env.BASE_URL}/blog/${article.slug}`;
 
 <a href={href} class="block bg-card-bg border-l-2 border-card-border mb-3 hover:border-terminal-green transition-colors cursor-pointer no-underline overflow-hidden" data-animate="card">
   {article.image && (
-    <img
-      src={`${import.meta.env.BASE_URL}${article.image}`}
-      alt={article.title}
-      class="w-full h-28 object-cover border-b border-card-border"
-      loading="lazy"
-    />
+    <div class="relative w-full h-28 overflow-hidden border-b border-card-border">
+      <img
+        src={`${import.meta.env.BASE_URL}${article.image}`}
+        alt={article.title}
+        class="w-full h-full object-cover grayscale brightness-50"
+        loading="lazy"
+      />
+      <div class="absolute inset-0 bg-terminal-green/15 mix-blend-overlay"></div>
+      <div class="absolute inset-0 bg-game-bg/30"></div>
+    </div>
   )}
   <div class="p-3">
     <div class="flex justify-between items-start">
