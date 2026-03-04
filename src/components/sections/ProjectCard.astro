@@ -7,10 +7,12 @@ interface Props {
 }
 
 const { project } = Astro.props;
+const href = `${import.meta.env.BASE_URL}projects/${project.slug}`;
 ---
 
-<div
-  class="bg-card-bg border-l-2 border-card-border p-3 mb-3 hover:border-terminal-green transition-colors"
+<a
+  href={href}
+  class="block bg-card-bg border-l-2 border-card-border p-3 mb-3 hover:border-terminal-green transition-colors cursor-pointer no-underline"
   data-animate="card"
 >
   <div class="flex items-start justify-between">
@@ -22,4 +24,4 @@ const { project } = Astro.props;
   </div>
   <p class="text-muted text-xs mt-1">{project.description}</p>
   <span class="text-terminal-green text-xs mt-2 inline-block font-bold">[{project.techTag}]</span>
-</div>
+</a>
