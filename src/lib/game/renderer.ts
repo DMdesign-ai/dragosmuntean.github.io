@@ -58,12 +58,19 @@ export function drawLaneLines(
 }
 
 /**
- * Draw a single obstacle using mode-specific sprite lookup.
+ * Draw a single obstacle using mode-specific sprite lookup, with a red danger outline.
  */
 export function drawObstacle(ctx: CanvasRenderingContext2D, obstacle: Obstacle, mode: GameMode) {
   const sprite = OBSTACLE_SPRITES[mode]?.[obstacle.type];
   if (sprite) {
     drawSprite(ctx, sprite, obstacle.x, obstacle.y, 2);
+
+    // Red danger stroke around the obstacle
+    ctx.strokeStyle = COLORS.obstacleSpike;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.strokeRect(obstacle.x - 1, obstacle.y - 1, obstacle.width + 2, obstacle.height + 2);
+    ctx.globalAlpha = 1;
   }
 }
 

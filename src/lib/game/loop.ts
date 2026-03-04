@@ -43,6 +43,40 @@ export interface GameHandle {
   showSelection: () => void;
 }
 
+// --- Session persistence helpers ---
+
+const STORAGE_KEY = 'runner_game_state';
+
+interface SavedGameState {
+  mode: GameMode;
+  score: number;
+  highScore: number;
+  scrollSpeed: number;
+  frameCount: number;
+}
+
+function saveGameState(state: GameState) {
+  try {
+    const saved: SavedGameState = {
+      mode: state.selectedMode,
+      score: state.score,
+      highScore: state.highScore,
+      scrollSpeed: state.scrollSpeed,
+      frameCount: state.frameCount,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  } catch { /* silently fail in SSR / private browsing */ }
+}
+
+function loadGameState(): SavedGameState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(STORAGE_KEY); // consume once
+    return JSON.parse(raw) as SavedGameState;
+  } catch { return null; }
+}
+
 // --- Internal game state ---
 
 type GamePhase = 'selecting' | 'playing';
@@ -327,6 +361,8 @@ function update(
         door.entered = true;
         state.navigating = true;
         state.navigateStartFrame = state.frameCount;
+        // Persist game state so the game resumes when the user returns
+        saveGameState(state);
         callbacks.onDoorEnter(door.projectSlug);
       }
     }
@@ -384,7 +420,21 @@ export function createGameLoop(
   projects: DoorProjectData[] = [],
   callbacks: GameCallbacks = { onDoorEnter: () => {} },
 ): GameHandle {
-  const state = initGameState(width, height, projects);
+  // Check for saved state (returning from a project page)
+  const saved = loadGameState();
+  const state = initGameState(width, height, projects, saved?.highScore ?? 0);
+
+  if (saved) {
+    // Resume directly into playing phase with the same mode
+    state.phase = 'playing';
+    state.selectedMode = saved.mode;
+    state.selectIndex = saved.mode === 'trail' ? 1 : 0;
+    state.started = true;
+    state.scrollSpeed = Math.min(saved.scrollSpeed, PHYSICS.maxScrollSpeed);
+    state.frameCount = saved.frameCount;
+    state.score = saved.score;
+  }
+
   let animId: number;
   let running = true;
 
