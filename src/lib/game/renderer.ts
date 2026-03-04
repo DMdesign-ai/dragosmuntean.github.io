@@ -7,8 +7,9 @@ import {
   SPIKE_SPRITE,
   BARRIER_SPRITE,
   COIN_SPRITE,
+  DOOR_SPRITE,
 } from './sprites';
-import type { Obstacle, Coin, Star, PlayerState } from './entities';
+import type { Obstacle, Coin, Star, PlayerState, Door } from './entities';
 
 export function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
   ctx.fillStyle = COLORS.bg;
@@ -161,4 +162,63 @@ export function drawScoreHUD(
   ctx.fillText(`SPD:${speedPct}%`, width - 10, 18);
 
   ctx.textAlign = 'start';
+}
+
+/**
+ * Draw a door portal with pulsing glow effect and project name label.
+ */
+export function drawDoor(
+  ctx: CanvasRenderingContext2D,
+  door: Door,
+  frameCount: number,
+) {
+  if (door.entered) return;
+
+  // Pulsing glow behind the portal
+  const glowIntensity = 0.15 + Math.sin(frameCount * 0.08) * 0.1;
+  ctx.save();
+  ctx.globalAlpha = glowIntensity;
+  ctx.fillStyle = COLORS.doorCyanGlow;
+  ctx.fillRect(door.x - 6, door.y - 6, door.width + 12, door.height + 12);
+  ctx.restore();
+
+  // Draw the portal sprite
+  drawSprite(ctx, DOOR_SPRITE, door.x, door.y, 2);
+
+  // Draw project name label below the portal
+  ctx.fillStyle = COLORS.doorCyan;
+  ctx.font = '6px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(door.projectName, door.x + door.width / 2, door.y + door.height + 12);
+  ctx.textAlign = 'start';
+}
+
+/**
+ * Draw the door-enter transition: expanding cyan circle with loading text.
+ */
+export function drawDoorTransition(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  progress: number, // 0 to 1
+) {
+  const maxRadius = Math.sqrt(width * width + height * height) / 2;
+  const radius = maxRadius * progress;
+
+  ctx.save();
+  ctx.globalAlpha = 0.5 + progress * 0.5;
+  ctx.fillStyle = COLORS.doorCyan;
+  ctx.beginPath();
+  ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Loading text appears after initial flash
+  if (progress > 0.25) {
+    ctx.fillStyle = '#0a0e0a';
+    ctx.font = '10px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ENTERING...', width / 2, height / 2);
+    ctx.textAlign = 'start';
+  }
+  ctx.restore();
 }

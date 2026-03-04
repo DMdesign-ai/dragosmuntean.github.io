@@ -16,6 +16,18 @@ export interface Coin {
   speed: number;
 }
 
+export interface Door {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  projectSlug: string;
+  projectName: string;
+  speed: number;
+  entered: boolean;
+  glowPhase: number;
+}
+
 export interface Star {
   x: number;
   y: number;
@@ -85,6 +97,29 @@ export function createStars(canvasWidth: number, canvasHeight: number, count: nu
     });
   }
   return stars;
+}
+
+export function createDoor(
+  canvasWidth: number,
+  projectSlug: string,
+  projectName: string,
+): Door {
+  const width = 48;  // 24px sprite at 2x
+  const height = 40; // 20px sprite at 2x
+  // Position in center third of canvas for visibility
+  const centerStart = canvasWidth / 3;
+  const x = centerStart + Math.random() * (centerStart - width);
+  return {
+    x,
+    y: -height - 20,
+    width,
+    height,
+    projectSlug,
+    projectName,
+    speed: 0.7,
+    entered: false,
+    glowPhase: 0,
+  };
 }
 
 export function createPlayer(canvasWidth: number, canvasHeight: number): PlayerState {

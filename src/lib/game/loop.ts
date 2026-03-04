@@ -3,10 +3,12 @@ import type { InputHandler } from './input';
 import {
   createObstacle,
   createCoin,
+  createDoor,
   createStars,
   createPlayer,
   type Obstacle,
   type Coin,
+  type Door,
   type Star,
   type PlayerState,
 } from './entities';
@@ -16,14 +18,30 @@ import {
   drawLaneLines,
   drawObstacle,
   drawCoin,
+  drawDoor,
   drawPlayer,
   drawGameOver,
   drawScoreHUD,
+  drawDoorTransition,
 } from './renderer';
+
+// --- Public types for GameWorld.tsx ---
+
+export interface DoorProjectData {
+  slug: string;
+  name: string;
+}
+
+export interface GameCallbacks {
+  onDoorEnter: (projectSlug: string) => void;
+}
+
+// --- Internal game state ---
 
 interface GameState {
   obstacles: Obstacle[];
   coins: Coin[];
+  doors: Door[];
   stars: Star[];
   player: PlayerState;
   score: number;
@@ -32,15 +50,25 @@ interface GameState {
   scrollOffset: number;
   spawnTimer: number;
   coinSpawnTimer: number;
+  doorSpawnTimer: number;
+  doorProjectQueue: DoorProjectData[];
   frameCount: number;
   gameOver: boolean;
   started: boolean;
+  navigating: boolean;
+  navigateStartFrame: number;
 }
 
-function initGameState(width: number, height: number, prevHighScore: number = 0): GameState {
+function initGameState(
+  width: number,
+  height: number,
+  projects: DoorProjectData[],
+  prevHighScore: number = 0,
+): GameState {
   return {
     obstacles: [],
     coins: [],
+    doors: [],
     stars: createStars(width, height, GAME.starCount),
     player: createPlayer(width, height),
     score: 0,
@@ -49,13 +77,27 @@ function initGameState(width: number, height: number, prevHighScore: number = 0)
     scrollOffset: 0,
     spawnTimer: 0,
     coinSpawnTimer: 0,
+    doorSpawnTimer: 0,
+    doorProjectQueue: [...projects],
     frameCount: 0,
     gameOver: false,
     started: false,
+    navigating: false,
+    navigateStartFrame: 0,
   };
 }
 
-function update(state: GameState, input: InputHandler, width: number, height: number) {
+function update(
+  state: GameState,
+  input: InputHandler,
+  width: number,
+  height: number,
+  projects: DoorProjectData[],
+  callbacks: GameCallbacks,
+) {
+  // Freeze everything during door transition
+  if (state.navigating) return;
+
   // Wait for first input to start the game
   if (!state.started) {
     if (input.left || input.right || input.up || input.down) {
@@ -70,7 +112,7 @@ function update(state: GameState, input: InputHandler, width: number, height: nu
       // Reset but keep high score
       const hs = state.highScore;
       const stars = state.stars;
-      Object.assign(state, initGameState(width, height, hs));
+      Object.assign(state, initGameState(width, height, projects, hs));
       state.stars = stars; // reuse stars
       state.started = true;
     }
@@ -155,6 +197,22 @@ function update(state: GameState, input: InputHandler, width: number, height: nu
     state.coins.push(createCoin(width));
   }
 
+  // --- Spawn doors (every ~150m) ---
+  state.doorSpawnTimer++;
+  if (
+    state.doorSpawnTimer >= GAME.doorSpawnInterval &&
+    state.doorProjectQueue.length > 0
+  ) {
+    state.doorSpawnTimer = 0;
+    const next = state.doorProjectQueue.shift()!;
+    state.doors.push(createDoor(width, next.slug, next.name));
+
+    // Refill queue when empty so doors keep cycling
+    if (state.doorProjectQueue.length === 0) {
+      state.doorProjectQueue = [...projects];
+    }
+  }
+
   // --- Move obstacles downward ---
   for (const obs of state.obstacles) {
     obs.y += state.scrollSpeed * obs.speed;
@@ -165,9 +223,16 @@ function update(state: GameState, input: InputHandler, width: number, height: nu
     coin.y += state.scrollSpeed * coin.speed;
   }
 
-  // --- Remove off-screen obstacles and coins ---
+  // --- Move doors downward ---
+  for (const door of state.doors) {
+    door.y += state.scrollSpeed * door.speed;
+    door.glowPhase += 0.05;
+  }
+
+  // --- Remove off-screen entities ---
   state.obstacles = state.obstacles.filter((o) => o.y < height + 20);
   state.coins = state.coins.filter((c) => c.y < height + 20 && !c.collected);
+  state.doors = state.doors.filter((d) => d.y < height + 20 && !d.entered);
 
   // --- Move stars slowly for parallax ---
   for (const star of state.stars) {
@@ -216,6 +281,27 @@ function update(state: GameState, input: InputHandler, width: number, height: nu
       }
     }
   }
+
+  // --- Door collision (player enters portal — NOT lethal) ---
+  if (p.alive) {
+    for (const door of state.doors) {
+      if (door.entered) continue;
+      // Player center must be inside door bounds (generous detection)
+      const pcx = p.x + p.width / 2;
+      const pcy = p.y + p.height / 2;
+      if (
+        pcx > door.x &&
+        pcx < door.x + door.width &&
+        pcy > door.y &&
+        pcy < door.y + door.height
+      ) {
+        door.entered = true;
+        state.navigating = true;
+        state.navigateStartFrame = state.frameCount;
+        callbacks.onDoorEnter(door.projectSlug);
+      }
+    }
+  }
 }
 
 function render(
@@ -238,6 +324,11 @@ function render(
     drawCoin(ctx, coin);
   }
 
+  // Draw doors
+  for (const door of state.doors) {
+    drawDoor(ctx, door, state.frameCount);
+  }
+
   // Draw player
   drawPlayer(ctx, state.player);
 
@@ -257,6 +348,13 @@ function render(
   if (state.gameOver) {
     drawGameOver(ctx, width, height, state.score, state.highScore);
   }
+
+  // Door transition overlay (expanding cyan circle)
+  if (state.navigating) {
+    const elapsed = state.frameCount - state.navigateStartFrame;
+    const progress = Math.min(elapsed / GAME.doorTransitionFrames, 1);
+    drawDoorTransition(ctx, width, height, progress);
+  }
 }
 
 export function createGameLoop(
@@ -264,15 +362,22 @@ export function createGameLoop(
   width: number,
   height: number,
   input: InputHandler,
+  projects: DoorProjectData[] = [],
+  callbacks: GameCallbacks = { onDoorEnter: () => {} },
 ): () => void {
-  const state = initGameState(width, height);
+  const state = initGameState(width, height, projects);
   let animId: number;
   let running = true;
 
   function tick() {
     if (!running) return;
-    update(state, input, width, height);
+    update(state, input, width, height, projects, callbacks);
+    // Keep rendering during navigation for the transition animation
     render(ctx, state, width, height);
+    // Increment frame count during navigation for transition progress
+    if (state.navigating) {
+      state.frameCount++;
+    }
     animId = requestAnimationFrame(tick);
   }
 

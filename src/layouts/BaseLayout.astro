@@ -4,9 +4,10 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  bodyClass?: string;
 }
 
-const { title, description = 'Dragos Muntean — UI/UX Designer & Developer' } = Astro.props;
+const { title, description = 'Dragos Muntean — UI/UX Designer & Developer', bodyClass = '' } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,7 +26,7 @@ const { title, description = 'Dragos Muntean — UI/UX Designer & Developer' } =
     />
     <title>{title}</title>
   </head>
-  <body class="bg-game-bg text-terminal-green antialiased font-mono">
+  <body class:list={["bg-game-bg text-terminal-green antialiased font-mono", bodyClass]}>
     <slot />
   </body>
 </html>
