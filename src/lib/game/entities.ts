@@ -1,4 +1,7 @@
-export type ObstacleType = 'rock' | 'spike' | 'barrier';
+import type { GameMode } from './modes';
+import { MODE_CONFIGS } from './modes';
+
+export type ObstacleType = string;
 
 export interface Obstacle {
   x: number;
@@ -47,19 +50,25 @@ export interface PlayerState {
 }
 
 // Obstacle dimensions per type (in pixels at 2x scale)
-const OBSTACLE_SIZES: Record<ObstacleType, { w: number; h: number }> = {
-  rock: { w: 16, h: 16 },      // 8x8 sprite at 2x
-  spike: { w: 20, h: 16 },     // 10x8 sprite at 2x
-  barrier: { w: 24, h: 12 },   // 12x6 sprite at 2x
+const OBSTACLE_SIZES: Record<string, { w: number; h: number }> = {
+  // Road mode
+  car: { w: 20, h: 16 },     // 10x8 sprite at 2x
+  cone: { w: 12, h: 16 },    // 6x8 sprite at 2x
+  manhole: { w: 16, h: 16 }, // 8x8 sprite at 2x
+  // Trail mode
+  bear: { w: 20, h: 20 },    // 10x10 sprite at 2x
+  log: { w: 24, h: 8 },      // 12x4 sprite at 2x
+  bush: { w: 20, h: 16 },    // 10x8 sprite at 2x
 };
 
 export function createObstacle(
   canvasWidth: number,
   scrollSpeed: number,
+  mode: GameMode,
 ): Obstacle {
-  const types: ObstacleType[] = ['rock', 'spike', 'barrier'];
+  const types = MODE_CONFIGS[mode].obstacleTypes;
   const type = types[Math.floor(Math.random() * types.length)];
-  const size = OBSTACLE_SIZES[type];
+  const size = OBSTACLE_SIZES[type] ?? { w: 16, h: 16 };
 
   // Random horizontal position with padding from edges
   const padding = 20;

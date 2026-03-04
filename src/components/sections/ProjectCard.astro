@@ -9,7 +9,13 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<div class="bg-card-bg border-l-2 border-card-border p-3 mb-3 hover:border-terminal-green transition-colors" data-animate="card">
+<div
+  class="bg-card-bg border-l-2 border-card-border p-3 mb-3 hover:border-terminal-green transition-colors cursor-pointer"
+  data-animate="card"
+  data-project-card
+  role="button"
+  tabindex="0"
+>
   <div class="flex items-start justify-between">
     <div class="flex items-center gap-2">
       <PixelIcon type={project.icon} />

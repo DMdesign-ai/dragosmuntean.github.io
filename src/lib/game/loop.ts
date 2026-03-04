@@ -1,5 +1,6 @@
 import { PHYSICS, GAME } from '../gameConstants';
 import type { InputHandler } from './input';
+import type { GameMode } from './modes';
 import {
   createObstacle,
   createCoin,
@@ -23,6 +24,7 @@ import {
   drawGameOver,
   drawScoreHUD,
   drawDoorTransition,
+  drawCharacterSelect,
 } from './renderer';
 
 // --- Public types for GameWorld.tsx ---
@@ -36,9 +38,22 @@ export interface GameCallbacks {
   onDoorEnter: (projectSlug: string) => void;
 }
 
+export interface GameHandle {
+  cleanup: () => void;
+  showSelection: () => void;
+}
+
 // --- Internal game state ---
 
+type GamePhase = 'selecting' | 'playing';
+
 interface GameState {
+  phase: GamePhase;
+  selectedMode: GameMode;
+  selectIndex: number; // 0 = road, 1 = trail
+  selectFrameCount: number;
+  selectDebounce: number; // prevent rapid toggling
+
   obstacles: Obstacle[];
   coins: Coin[];
   doors: Door[];
@@ -66,6 +81,12 @@ function initGameState(
   prevHighScore: number = 0,
 ): GameState {
   return {
+    phase: 'selecting',
+    selectedMode: 'road',
+    selectIndex: 0,
+    selectFrameCount: 0,
+    selectDebounce: 0,
+
     obstacles: [],
     coins: [],
     doors: [],
@@ -98,23 +119,48 @@ function update(
   // Freeze everything during door transition
   if (state.navigating) return;
 
-  // Wait for first input to start the game
-  if (!state.started) {
-    if (input.left || input.right || input.up || input.down) {
+  // ========== CHARACTER SELECTION PHASE ==========
+  if (state.phase === 'selecting') {
+    state.selectFrameCount++;
+
+    // Debounce counter
+    if (state.selectDebounce > 0) {
+      state.selectDebounce--;
+    }
+
+    // Left/right to toggle selection
+    if (state.selectDebounce === 0) {
+      if (input.left && state.selectIndex > 0) {
+        state.selectIndex = 0;
+        state.selectDebounce = 10;
+      }
+      if (input.right && state.selectIndex < 1) {
+        state.selectIndex = 1;
+        state.selectDebounce = 10;
+      }
+    }
+
+    // Confirm selection
+    if (input.confirm) {
+      state.selectedMode = state.selectIndex === 0 ? 'road' : 'trail';
+      state.phase = 'playing';
       state.started = true;
+      // Clear keys to prevent immediate movement
+      input.keys['Enter'] = false;
+      input.keys[' '] = false;
     }
     return;
   }
 
-  // Game over — wait for restart
+  // ========== PLAYING PHASE ==========
+
+  // Game over — wait for restart → back to selection
   if (state.gameOver) {
     if (input.restart) {
-      // Reset but keep high score
       const hs = state.highScore;
       const stars = state.stars;
       Object.assign(state, initGameState(width, height, projects, hs));
-      state.stars = stars; // reuse stars
-      state.started = true;
+      state.stars = stars;
     }
     return;
   }
@@ -136,28 +182,19 @@ function update(
   // --- Player movement ---
   const p = state.player;
 
-  // Invincibility countdown
   if (p.invincibleTimer > 0) {
     p.invincibleTimer -= 1;
   }
 
-  if (input.left) {
-    p.x -= PHYSICS.playerSpeed;
-  }
-  if (input.right) {
-    p.x += PHYSICS.playerSpeed;
-  }
-  if (input.up) {
-    p.y -= PHYSICS.playerVerticalSpeed;
-  }
-  if (input.down) {
-    p.y += PHYSICS.playerVerticalSpeed;
-  }
+  if (input.left) p.x -= PHYSICS.playerSpeed;
+  if (input.right) p.x += PHYSICS.playerSpeed;
+  if (input.up) p.y -= PHYSICS.playerVerticalSpeed;
+  if (input.down) p.y += PHYSICS.playerVerticalSpeed;
 
   // Clamp player to screen bounds
   if (p.x < 6) p.x = 6;
   if (p.x + p.width > width - 6) p.x = width - 6 - p.width;
-  if (p.y < 30) p.y = 30; // leave room for HUD
+  if (p.y < 30) p.y = 30;
   if (p.y + p.height > height - 4) p.y = height - 4 - p.height;
 
   // Run animation
@@ -167,7 +204,7 @@ function update(
     p.animTimer = 0;
   }
 
-  // --- Spawn obstacles ---
+  // --- Spawn obstacles (mode-aware) ---
   state.spawnTimer++;
   const currentSpawnInterval = Math.max(
     GAME.minSpawnInterval,
@@ -176,9 +213,8 @@ function update(
 
   if (state.spawnTimer >= currentSpawnInterval) {
     state.spawnTimer = 0;
-    const newObs = createObstacle(width, state.scrollSpeed);
+    const newObs = createObstacle(width, state.scrollSpeed, state.selectedMode);
 
-    // Make sure new obstacle doesn't overlap existing ones near the top
     const tooClose = state.obstacles.some(
       (o) =>
         o.y < GAME.obstacleMinGap &&
@@ -197,7 +233,7 @@ function update(
     state.coins.push(createCoin(width));
   }
 
-  // --- Spawn doors (every ~150m) ---
+  // --- Spawn doors ---
   state.doorSpawnTimer++;
   if (
     state.doorSpawnTimer >= GAME.doorSpawnInterval &&
@@ -207,23 +243,18 @@ function update(
     const next = state.doorProjectQueue.shift()!;
     state.doors.push(createDoor(width, next.slug, next.name));
 
-    // Refill queue when empty so doors keep cycling
     if (state.doorProjectQueue.length === 0) {
       state.doorProjectQueue = [...projects];
     }
   }
 
-  // --- Move obstacles downward ---
+  // --- Move entities downward ---
   for (const obs of state.obstacles) {
     obs.y += state.scrollSpeed * obs.speed;
   }
-
-  // --- Move coins downward ---
   for (const coin of state.coins) {
     coin.y += state.scrollSpeed * coin.speed;
   }
-
-  // --- Move doors downward ---
   for (const door of state.doors) {
     door.y += state.scrollSpeed * door.speed;
     door.glowPhase += 0.05;
@@ -234,7 +265,7 @@ function update(
   state.coins = state.coins.filter((c) => c.y < height + 20 && !c.collected);
   state.doors = state.doors.filter((d) => d.y < height + 20 && !d.entered);
 
-  // --- Move stars slowly for parallax ---
+  // --- Move stars for parallax ---
   for (const star of state.stars) {
     star.y += state.scrollSpeed * 0.15;
     if (star.y > height) {
@@ -243,9 +274,9 @@ function update(
     }
   }
 
-  // --- Collision detection (AABB with shrunk hitbox for fairness) ---
+  // --- Collision detection ---
   if (p.invincibleTimer <= 0) {
-    const hitboxShrink = 6; // pixels of forgiveness on each side
+    const hitboxShrink = 6;
     const px1 = p.x + hitboxShrink;
     const py1 = p.y + hitboxShrink;
     const px2 = p.x + p.width - hitboxShrink;
@@ -258,7 +289,6 @@ function update(
       const oy2 = obs.y + obs.height - 2;
 
       if (px1 < ox2 && px2 > ox1 && py1 < oy2 && py2 > oy1) {
-        // Collision!
         state.gameOver = true;
         p.alive = false;
         if (state.score > state.highScore) {
@@ -282,11 +312,10 @@ function update(
     }
   }
 
-  // --- Door collision (player enters portal — NOT lethal) ---
+  // --- Door collision ---
   if (p.alive) {
     for (const door of state.doors) {
       if (door.entered) continue;
-      // Player center must be inside door bounds (generous detection)
       const pcx = p.x + p.width / 2;
       const pcy = p.y + p.height / 2;
       if (
@@ -310,46 +339,36 @@ function render(
   width: number,
   height: number,
 ) {
-  drawBackground(ctx, width, height);
-  drawStars(ctx, state.stars);
-  drawLaneLines(ctx, width, height, state.scrollOffset);
-
-  // Draw obstacles
-  for (const obs of state.obstacles) {
-    drawObstacle(ctx, obs);
+  // Character selection screen
+  if (state.phase === 'selecting') {
+    drawCharacterSelect(ctx, width, height, state.selectIndex, state.selectFrameCount);
+    return;
   }
 
-  // Draw coins
+  // Playing phase
+  const mode = state.selectedMode;
+
+  drawBackground(ctx, width, height);
+  drawStars(ctx, state.stars);
+  drawLaneLines(ctx, width, height, state.scrollOffset, mode);
+
+  for (const obs of state.obstacles) {
+    drawObstacle(ctx, obs, mode);
+  }
   for (const coin of state.coins) {
     drawCoin(ctx, coin);
   }
-
-  // Draw doors
   for (const door of state.doors) {
     drawDoor(ctx, door, state.frameCount);
   }
 
-  // Draw player
-  drawPlayer(ctx, state.player);
-
-  // Draw HUD
+  drawPlayer(ctx, state.player, mode);
   drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
 
-  // Pre-start prompt
-  if (!state.started) {
-    ctx.fillStyle = '#00ff41';
-    ctx.font = '8px "Press Start 2P", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('[ARROWS] TO RUN', width / 2, height / 2);
-    ctx.textAlign = 'start';
-  }
-
-  // Game over overlay
   if (state.gameOver) {
     drawGameOver(ctx, width, height, state.score, state.highScore);
   }
 
-  // Door transition overlay (expanding cyan circle)
   if (state.navigating) {
     const elapsed = state.frameCount - state.navigateStartFrame;
     const progress = Math.min(elapsed / GAME.doorTransitionFrames, 1);
@@ -364,7 +383,7 @@ export function createGameLoop(
   input: InputHandler,
   projects: DoorProjectData[] = [],
   callbacks: GameCallbacks = { onDoorEnter: () => {} },
-): () => void {
+): GameHandle {
   const state = initGameState(width, height, projects);
   let animId: number;
   let running = true;
@@ -372,9 +391,7 @@ export function createGameLoop(
   function tick() {
     if (!running) return;
     update(state, input, width, height, projects, callbacks);
-    // Keep rendering during navigation for the transition animation
     render(ctx, state, width, height);
-    // Increment frame count during navigation for transition progress
     if (state.navigating) {
       state.frameCount++;
     }
@@ -383,8 +400,17 @@ export function createGameLoop(
 
   animId = requestAnimationFrame(tick);
 
-  return () => {
-    running = false;
-    cancelAnimationFrame(animId);
+  return {
+    cleanup: () => {
+      running = false;
+      cancelAnimationFrame(animId);
+    },
+    showSelection: () => {
+      // Reset to selection screen, preserving high score and stars
+      const hs = state.highScore;
+      const stars = state.stars;
+      Object.assign(state, initGameState(width, height, projects, hs));
+      state.stars = stars;
+    },
   };
 }
