@@ -10,6 +10,20 @@ const projects = defineCollection({
     tags: z.array(z.string()).default([]),
     image: z.string().optional(),
     draft: z.boolean().default(false),
+    category: z.enum(['work', 'personal']).default('work'),
+    company: z.string().optional(),
+    role: z.string().optional(),
+    duration: z.string().optional(),
+    impact: z.array(z.string()).default([]),
+    testimonials: z
+      .array(
+        z.object({
+          quote: z.string(),
+          author: z.string(),
+          role: z.string(),
+        }),
+      )
+      .default([]),
   }),
 });
 
