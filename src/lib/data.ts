@@ -59,7 +59,7 @@ export const blogArticles: BlogArticle[] = [
     description: 'Design systems + Make automation = AI-assisted dev that doesn\'t sacrifice design quality.',
     date: 'AUG 2025',
     tags: ['Figma', 'Design Systems', 'AI'],
-    image: '/images/blog/calisthenics.png',
+    image: '/images/blog/calisthenics.jpg',
   },
 ];
 
