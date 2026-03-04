@@ -20,7 +20,7 @@ const { title, description, company, role, duration, tags, impact, testimonials,
     <!-- Back navigation bar -->
     <header class="h-10 flex items-center border-b border-hud-border px-4 text-xs font-mono">
       <a
-        href={`${import.meta.env.BASE_URL}`}
+        href="/"
         class="text-terminal-dim hover:text-terminal-green transition-colors"
       >
         &lt; BACK TO GAME
@@ -74,7 +74,7 @@ const { title, description, company, role, duration, tags, impact, testimonials,
           {images.map((img: string, i: number) => (
             <div class="border border-card-border overflow-hidden">
               <img
-                src={`${import.meta.env.BASE_URL}${img}`}
+                src={img}
                 alt={`${title} — screenshot ${i + 1}`}
                 class="w-full h-auto block"
                 loading={i === 0 ? 'eager' : 'lazy'}
@@ -85,7 +85,7 @@ const { title, description, company, role, duration, tags, impact, testimonials,
       ) : image ? (
         <div class="border border-card-border mb-8 overflow-hidden">
           <img
-            src={`${import.meta.env.BASE_URL}${image}`}
+            src={image}
             alt={`${title} — project screenshot`}
             class="w-full h-auto block"
             loading="eager"
@@ -129,7 +129,7 @@ const { title, description, company, role, duration, tags, impact, testimonials,
       <!-- Back to game CTA -->
       <div class="mt-16 text-center">
         <a
-          href={`${import.meta.env.BASE_URL}`}
+          href="/"
           class="inline-block border border-terminal-green px-6 py-3 text-sm font-pixel hover:bg-terminal-green hover:text-game-bg transition-colors"
         >
           [RETURN TO GAME]

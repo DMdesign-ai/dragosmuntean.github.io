@@ -26,7 +26,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
     <!-- Back navigation bar -->
     <header class="h-10 flex items-center border-b border-hud-border px-4 text-xs font-mono">
       <a
-        href={`${import.meta.env.BASE_URL}`}
+        href="/"
         class="text-terminal-dim hover:text-terminal-green transition-colors"
       >
         &lt; BACK TO GAME
@@ -39,7 +39,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
       {image && (
         <div class="relative w-full overflow-hidden border border-card-border mb-8">
           <img
-            src={`${import.meta.env.BASE_URL}${image}`}
+            src={image}
             alt={title}
             class="w-full h-auto block grayscale brightness-50"
           />
@@ -81,7 +81,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
       <!-- Back to game CTA -->
       <div class="mt-16 text-center">
         <a
-          href={`${import.meta.env.BASE_URL}`}
+          href="/"
           class="inline-block border border-terminal-green px-6 py-3 text-sm font-pixel hover:bg-terminal-green hover:text-game-bg transition-colors"
         >
           [RETURN TO GAME]

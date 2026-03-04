@@ -10,8 +10,8 @@ const DOOR_PROJECTS: DoorProjectData[] = [
   { slug: 'help-center-improvements', name: 'HELP CENTER' },
 ];
 
-// Base path from Astro config
-const BASE_PATH = '/dragosmuntean.github.io';
+// Base path (root since using custom domain)
+const BASE_PATH = '';
 
 export default function GameWorld() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

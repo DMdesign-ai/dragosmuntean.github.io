@@ -8,14 +8,14 @@ interface Props {
 
 const { article, index } = Astro.props;
 const postLabel = `POST_0${index + 1}`;
-const href = `${import.meta.env.BASE_URL}/blog/${article.slug}`;
+const href = `/blog/${article.slug}`;
 ---
 
 <a href={href} class="block bg-card-bg border-l-2 border-card-border mb-3 hover:border-terminal-green transition-colors cursor-pointer no-underline overflow-hidden" data-animate="card">
   {article.image && (
     <div class="relative w-full h-28 overflow-hidden border-b border-card-border">
       <img
-        src={`${import.meta.env.BASE_URL}${article.image}`}
+        src={article.image}
         alt={article.title}
         class="w-full h-full object-cover grayscale brightness-50"
         loading="lazy"
