@@ -6,7 +6,7 @@ export class InputHandler {
 
   constructor() {
     this.onKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Enter', 'Escape'].includes(e.key)) {
         e.preventDefault();
         this.keys[e.key] = true;
       }
@@ -42,6 +42,10 @@ export class InputHandler {
 
   get confirm(): boolean {
     return !!this.keys['Enter'] || !!this.keys[' '];
+  }
+
+  get escape(): boolean {
+    return !!this.keys['Escape'];
   }
 
   destroy() {

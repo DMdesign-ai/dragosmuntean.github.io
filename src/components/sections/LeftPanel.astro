@@ -4,21 +4,24 @@ import ProjectCard from './ProjectCard.astro';
 import { projects } from '../../lib/data';
 ---
 
-<aside class="w-[28%] h-full overflow-y-auto p-5 border-r border-hud-border shrink-0">
-  <HeroBlock />
+<aside class="w-[28%] h-full flex flex-col p-5 border-r border-hud-border shrink-0">
+  <!-- Scrollable top content -->
+  <div class="flex-1 overflow-y-auto min-h-0">
+    <HeroBlock />
 
-  <div class="mt-8">
-    <h2 class="text-center text-muted text-xs tracking-widest mb-2">--- PROJECTS ---</h2>
-    <p class="text-center text-[10px] text-door-cyan mb-4 blink">
-      CLICK OR RUN INTO A PORTAL
-    </p>
-    {projects.map((project) => (
-      <ProjectCard project={project} />
-    ))}
+    <div class="mt-8">
+      <h2 class="text-center text-muted text-xs tracking-widest mb-2">--- PROJECTS ---</h2>
+      <p class="text-center text-[10px] text-door-cyan mb-4 blink">
+        CLICK OR RUN INTO A PORTAL
+      </p>
+      {projects.map((project) => (
+        <ProjectCard project={project} />
+      ))}
+    </div>
   </div>
 
-  <!-- Runner stats -->
-  <div class="mt-8">
+  <!-- Runner stats — pinned to bottom -->
+  <div class="shrink-0 pt-4 border-t border-hud-border mt-4">
     <h2 class="text-center text-muted text-xs tracking-widest mb-3">--- RUNNER STATS ---</h2>
     <div class="bg-card-bg border-l-2 border-card-border p-3 text-xs space-y-2">
       <div>
@@ -34,9 +37,8 @@ import { projects } from '../../lib/data';
         <span class="text-terminal-green"> Zuri Half Marathon</span>
       </div>
     </div>
-  </div>
-
-  <div class="mt-6 text-xs text-muted">
-    ITEMS: 0/10&nbsp;&nbsp;COINS: 0
+    <div class="mt-3 text-xs text-muted">
+      ITEMS: 0/10&nbsp;&nbsp;COINS: 0
+    </div>
   </div>
 </aside>

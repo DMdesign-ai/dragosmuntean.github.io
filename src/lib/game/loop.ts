@@ -188,6 +188,16 @@ function update(
 
   // ========== PLAYING PHASE ==========
 
+  // Escape → back to selection screen
+  if (input.escape) {
+    const hs = state.highScore;
+    const stars = state.stars;
+    Object.assign(state, initGameState(width, height, projects, hs));
+    state.stars = stars;
+    input.keys['Escape'] = false; // consume the key
+    return;
+  }
+
   // Game over — wait for restart → back to selection
   if (state.gameOver) {
     if (input.restart) {
