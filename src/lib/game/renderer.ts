@@ -137,12 +137,12 @@ export function drawSpeechBubble(
   ctx.globalAlpha = alpha;
 
   // Measure text to size bubble
-  ctx.font = '6px "Press Start 2P", monospace';
+  ctx.font = '8px "Press Start 2P", monospace';
   const textWidth = ctx.measureText(text).width;
-  const padX = 6;
-  const padY = 5;
+  const padX = 8;
+  const padY = 6;
   const bubbleW = textWidth + padX * 2;
-  const bubbleH = 14 + padY;
+  const bubbleH = 16 + padY;
   const bubbleX = Math.floor(player.x + player.width / 2 - bubbleW / 2);
   const bubbleY = Math.floor(player.y - bubbleH - 8);
 
@@ -187,9 +187,9 @@ export function drawSpeechBubble(
 
   // Text
   ctx.fillStyle = '#00ff41';
-  ctx.font = '6px "Press Start 2P", monospace';
+  ctx.font = '8px "Press Start 2P", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(text, bubbleX + bubbleW / 2, bubbleY + padY + 8);
+  ctx.fillText(text, bubbleX + bubbleW / 2, bubbleY + padY + 10);
   ctx.textAlign = 'start';
 
   ctx.restore();
