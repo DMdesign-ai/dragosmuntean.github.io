@@ -41,6 +41,7 @@ export const blogArticles: BlogArticle[] = [
     description: '43 commits, 4 rewrites. A Figma plugin + web tool for SVG icon normalization, built with Claude Code.',
     date: 'MAR 2026',
     tags: ['Claude Code', 'Figma Plugin', 'SVG'],
+    image: '/images/blog/figma-plugins.png',
   },
   {
     id: 'agent-2-ui',
@@ -49,6 +50,7 @@ export const blogArticles: BlogArticle[] = [
     description: "We're about to stop designing interfaces. Google's A2UI and Disco show where we're headed.",
     date: 'JAN 2026',
     tags: ['AI', 'UX Design', 'A2UI'],
+    image: '/images/blog/agent-2-ui.png',
   },
   {
     id: 'calisthenics-figma',
@@ -57,6 +59,7 @@ export const blogArticles: BlogArticle[] = [
     description: 'Design systems + Make automation = AI-assisted dev that doesn\'t sacrifice design quality.',
     date: 'AUG 2025',
     tags: ['Figma', 'Design Systems', 'AI'],
+    image: '/images/blog/calisthenics.png',
   },
 ];
 

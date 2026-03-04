@@ -16,6 +16,7 @@ export interface BlogArticle {
   description: string;
   date: string;
   tags: string[];
+  image?: string;
 }
 
 export interface AIBoss {

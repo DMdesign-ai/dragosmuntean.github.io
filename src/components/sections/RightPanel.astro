@@ -1,7 +1,6 @@
 ---
 import LinkedInCard from './LinkedInCard.astro';
-import BossCard from './BossCard.astro';
-import { blogArticles, aiBosses } from '../../lib/data';
+import { blogArticles } from '../../lib/data';
 ---
 
 <aside class="w-[34%] h-full overflow-y-auto p-5 border-l border-hud-border shrink-0">
@@ -16,10 +15,18 @@ import { blogArticles, aiBosses } from '../../lib/data';
 
   <div class="flex justify-between items-center mt-8 mb-4">
     <h2 class="text-red-accent text-xs tracking-widest font-bold">!! BOSS ZONE: AI PROJECTS !!</h2>
-    <span class="text-terminal-green text-xs">BOSSES: 0/4</span>
+    <span class="text-muted text-xs">LOCKED</span>
   </div>
 
-  {aiBosses.map((boss) => (
-    <BossCard boss={boss} />
-  ))}
+  <div class="bg-card-bg border-l-2 border-card-border p-4 mb-3" data-animate="card">
+    <div class="text-center py-4">
+      <div class="text-2xl mb-2">🚧</div>
+      <p class="text-terminal-dim text-xs font-mono">UNDER CONSTRUCTION</p>
+      <p class="text-muted text-[10px] mt-1 font-mono">AI side projects loading...</p>
+      <div class="w-full h-2 bg-card-border mt-3">
+        <div class="h-full bg-gold" style="width: 15%"></div>
+      </div>
+      <p class="text-muted text-[9px] mt-1">15% COMPLETE</p>
+    </div>
+  </div>
 </aside>
