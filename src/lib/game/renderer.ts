@@ -216,25 +216,25 @@ export function drawCharacterSelect(
 ) {
   drawBackground(ctx, width, height);
 
-  // Responsive font sizes — ensure a readable minimum
-  const titleSize = Math.max(12, Math.floor(width * 0.04));
-  const labelSize = Math.max(10, Math.floor(width * 0.028));
-  const descSize = Math.max(8, Math.floor(width * 0.022));
-  const promptSize = Math.max(9, Math.floor(width * 0.025));
+  // Box sizing — each box takes ~40% of width, with a comfortable gap
+  const gap = Math.max(24, Math.floor(width * 0.06));
+  const boxW = Math.max(120, Math.floor((width - gap * 3) / 2));
+  const boxH = Math.max(140, Math.floor(height * 0.48));
+  const totalW = boxW * 2 + gap;
+  const startX = (width - totalW) / 2;
+  const boxY = Math.floor(height * 0.22);
+
+  // Font sizes relative to box width so text always fits inside
+  const titleSize = Math.max(10, Math.min(16, Math.floor(boxW * 0.08)));
+  const labelSize = Math.max(8, Math.min(12, Math.floor(boxW * 0.065)));
+  const descSize = Math.max(7, Math.min(10, Math.floor(boxW * 0.05)));
+  const promptSize = Math.max(8, Math.min(11, Math.floor(boxW * 0.06)));
 
   // Title
   ctx.fillStyle = '#00ff41';
   ctx.font = `${titleSize}px "Press Start 2P", monospace`;
   ctx.textAlign = 'center';
-  ctx.fillText('SELECT YOUR MODE', width / 2, height * 0.15);
-
-  // Two selection boxes — responsive sizing
-  const boxW = Math.max(110, Math.min(160, width * 0.38));
-  const boxH = Math.max(130, Math.min(180, height * 0.45));
-  const gap = 20;
-  const totalW = boxW * 2 + gap;
-  const startX = (width - totalW) / 2;
-  const boxY = height * 0.22;
+  ctx.fillText('SELECT YOUR MODE', width / 2, boxY - titleSize - 8);
 
   const modes: GameMode[] = ['road', 'trail'];
   modes.forEach((mode, i) => {
@@ -256,38 +256,48 @@ export function drawCharacterSelect(
     ctx.strokeRect(bx, boxY, boxW, boxH);
     ctx.globalAlpha = 1;
 
-    // Mode label — well below top border
+    // Clip content to box so nothing overflows
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(bx + 2, boxY + 2, boxW - 4, boxH - 4);
+    ctx.clip();
+
+    // Mode label
     ctx.fillStyle = isSelected ? '#00ff41' : '#4a4a4a';
     ctx.font = `${labelSize}px "Press Start 2P", monospace`;
-    ctx.fillText(config.label, bx + boxW / 2, boxY + 28);
+    ctx.textAlign = 'center';
+    ctx.fillText(config.label, bx + boxW / 2, boxY + labelSize + 14);
 
-    // Draw sample obstacle sprites centered in box with ample spacing
-    const spriteY = boxY + 44;
+    // Sample obstacle sprites — centered vertically in the box
+    const spriteZoneY = boxY + labelSize + 30;
     const sampleSprite = OBSTACLE_SPRITES[mode][config.obstacleTypes[0]];
     if (sampleSprite) {
       const spriteW = sampleSprite[0].length * 2;
       const spriteH = sampleSprite.length * 2;
-      drawSprite(ctx, sampleSprite, bx + (boxW - spriteW) / 2, spriteY, 2);
+      drawSprite(ctx, sampleSprite, bx + (boxW - spriteW) / 2, spriteZoneY, 2);
 
-      // Draw second obstacle below with more gap
       const sprite2 = OBSTACLE_SPRITES[mode][config.obstacleTypes[1]];
       if (sprite2) {
         const s2W = sprite2[0].length * 2;
-        drawSprite(ctx, sprite2, bx + (boxW - s2W) / 2, spriteY + spriteH + 12, 2);
+        drawSprite(ctx, sprite2, bx + (boxW - s2W) / 2, spriteZoneY + spriteH + 14, 2);
       }
     }
 
-    // Description — well above bottom border
+    // Description — near bottom of box
     ctx.fillStyle = isSelected ? '#00cc33' : '#3a3a3a';
     ctx.font = `${descSize}px "Press Start 2P", monospace`;
-    ctx.fillText(config.description, bx + boxW / 2, boxY + boxH - 14);
+    ctx.textAlign = 'center';
+    ctx.fillText(config.description, bx + boxW / 2, boxY + boxH - descSize - 6);
+
+    ctx.restore(); // Remove clip
   });
 
-  // Blinking prompt — more space below boxes
+  // Blinking prompt below boxes
   if (Math.floor(frameCount / 30) % 2 === 0) {
     ctx.fillStyle = '#00ff41';
     ctx.font = `${promptSize}px "Press Start 2P", monospace`;
-    const promptY = boxY + boxH + 36;
+    ctx.textAlign = 'center';
+    const promptY = boxY + boxH + 30;
     ctx.fillText('[LEFT/RIGHT] SELECT', width / 2, promptY);
     ctx.fillText('[SPACE] START', width / 2, promptY + promptSize + 10);
   }

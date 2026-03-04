@@ -14,7 +14,7 @@ export const MODE_CONFIGS: Record<GameMode, ModeConfig> = {
   road: {
     id: 'road',
     label: 'ROAD RUNNER',
-    description: 'DODGE TRAFFIC ON CITY STREETS',
+    description: 'DODGE CITY TRAFFIC',
     obstacleTypes: ['car', 'cone', 'manhole'],
     laneLineColor: '#2a2a2a',
     laneLineBrightColor: '#4a4a4a',
@@ -23,7 +23,7 @@ export const MODE_CONFIGS: Record<GameMode, ModeConfig> = {
   trail: {
     id: 'trail',
     label: 'TRAIL RUNNER',
-    description: 'SURVIVE THE WILD WILDERNESS',
+    description: 'SURVIVE THE WILD',
     obstacleTypes: ['bear', 'log', 'bush'],
     laneLineColor: '#3a2a1a',
     laneLineBrightColor: '#5a4a2a',
