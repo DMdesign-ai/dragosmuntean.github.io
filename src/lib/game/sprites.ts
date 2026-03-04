@@ -315,3 +315,54 @@ export function drawSprite(
     }
   }
 }
+
+/**
+ * Draw a pixel-art outline that traces the sprite silhouette.
+ * For every empty cell adjacent to a filled cell, draw a colored pixel.
+ */
+export function drawSpriteOutline(
+  ctx: CanvasRenderingContext2D,
+  sprite: (string | '')[][],
+  x: number,
+  y: number,
+  scale: number,
+  outlineColor: string,
+  alpha: number = 1,
+) {
+  const rows = sprite.length;
+  const cols = sprite[0]?.length ?? 0;
+  const prevAlpha = ctx.globalAlpha;
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = outlineColor;
+
+  // Check all cells including a 1-pixel border around the sprite
+  for (let row = -1; row <= rows; row++) {
+    for (let col = -1; col <= cols; col++) {
+      // Skip cells that are filled (we only draw outline on empty neighbors)
+      const isFilled = row >= 0 && row < rows && col >= 0 && col < cols && sprite[row][col];
+      if (isFilled) continue;
+
+      // Check if any of the 4 cardinal neighbors is a filled pixel
+      let hasFilledNeighbor = false;
+      for (const [dr, dc] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        const nr = row + dr;
+        const nc = col + dc;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && sprite[nr][nc]) {
+          hasFilledNeighbor = true;
+          break;
+        }
+      }
+
+      if (hasFilledNeighbor) {
+        ctx.fillRect(
+          Math.floor(x + col * scale),
+          Math.floor(y + row * scale),
+          scale,
+          scale,
+        );
+      }
+    }
+  }
+
+  ctx.globalAlpha = prevAlpha;
+}

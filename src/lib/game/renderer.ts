@@ -1,6 +1,7 @@
 import { COLORS, GAME } from '../gameConstants';
 import {
   drawSprite,
+  drawSpriteOutline,
   COIN_SPRITE,
   DOOR_SPRITE,
   OBSTACLE_SPRITES,
@@ -58,19 +59,14 @@ export function drawLaneLines(
 }
 
 /**
- * Draw a single obstacle using mode-specific sprite lookup, with a red danger outline.
+ * Draw a single obstacle using mode-specific sprite lookup, with a red silhouette outline.
  */
 export function drawObstacle(ctx: CanvasRenderingContext2D, obstacle: Obstacle, mode: GameMode) {
   const sprite = OBSTACLE_SPRITES[mode]?.[obstacle.type];
   if (sprite) {
+    // Red outline tracing the sprite shape (drawn first, behind the sprite)
+    drawSpriteOutline(ctx, sprite, obstacle.x, obstacle.y, 2, COLORS.obstacleSpike, 0.85);
     drawSprite(ctx, sprite, obstacle.x, obstacle.y, 2);
-
-    // Red danger stroke around the obstacle
-    ctx.strokeStyle = COLORS.obstacleSpike;
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.6;
-    ctx.strokeRect(obstacle.x - 1, obstacle.y - 1, obstacle.width + 2, obstacle.height + 2);
-    ctx.globalAlpha = 1;
   }
 }
 
