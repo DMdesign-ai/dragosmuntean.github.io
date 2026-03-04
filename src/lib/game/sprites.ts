@@ -13,6 +13,8 @@ const Br = '#8B6914'; // brown
 const Bd = '#6b4f10'; // dark brown
 const Lg = '#5a7a2a'; // light green
 const Dg = '#3a5a3a'; // dim green
+const C = '#00ffff'; // cyan (door portal)
+const Cd = '#009999'; // dark cyan
 
 // 16x18 runner character - facing camera (top-down "running up" view)
 export const RUNNER_UP: (string | '')[][] = [
@@ -110,6 +112,33 @@ export const COIN_SPRITE: (string | '')[][] = [
   [Y, Y, Y, '#b8960f', '#b8960f', Y, Y, Y],
   [_, Y, Y, Y, Y, Y, Y, _],
   [_, _, Y, Y, Y, Y, _, _],
+];
+
+// 24x20 door portal (archway with open center)
+export const DOOR_SPRITE: (string | '')[][] = [
+  // Top arch
+  [_, _, _, _, _, C, C, C, C, C, C, C, C, C, C, C, C, C, C, _, _, _, _, _],
+  [_, _, _, _, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, _, _, _, _],
+  [_, _, _, C, C, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, C, C, _, _, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  // Pillars with open center
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  [_, _, C, C, Cd, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Cd, C, C, _],
+  // Base
+  [_, _, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, _],
+  [_, _, C, C, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, Cd, C, C, _],
+  [_, _, _, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, _, _],
+  [_, _, _, _, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, _, _, _, _],
 ];
 
 export function drawSprite(

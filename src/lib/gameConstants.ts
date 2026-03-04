@@ -18,6 +18,10 @@ export const COLORS = {
   // HUD
   scoreText: '#00ff41',
   gameOverText: '#ff0040',
+  // Door portals
+  doorCyan: '#00ffff',
+  doorCyanDark: '#009999',
+  doorCyanGlow: '#00ffff',
 } as const;
 
 export const PHYSICS = {
@@ -38,4 +42,10 @@ export const GAME = {
   laneLineSpacing: 32,       // vertical spacing of lane dashes
   laneLineWidth: 2,
   laneLineDashLength: 12,
+  // Door portals
+  doorSpawnInterval: 900,  // frames between door spawns (~150m)
+  doorWidth: 48,
+  doorHeight: 40,
+  doorSpeed: 0.7,          // slower than obstacles so player can reach them
+  doorTransitionFrames: 48, // ~800ms at 60fps
 } as const;
