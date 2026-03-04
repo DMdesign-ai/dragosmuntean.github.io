@@ -67,20 +67,4 @@ import GameWorld from '../components/sections/GameWorld';
     delay: 0.2,
   });
 
-  // Project card click → open character selection in game
-  document.querySelectorAll('[data-project-card]').forEach((card) => {
-    card.addEventListener('click', () => {
-      window.dispatchEvent(
-        new CustomEvent('game:action', {
-          detail: { action: 'select' },
-        }),
-      );
-    });
-
-    card.addEventListener('keydown', (e) => {
-      if ((e as KeyboardEvent).key === 'Enter') {
-        (card as HTMLElement).click();
-      }
-    });
-  });
 </script>

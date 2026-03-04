@@ -55,25 +55,8 @@ export default function GameWorld() {
 
     observer.observe(container);
 
-    // Listen for project card clicks (CustomEvent from Astro script)
-    const handleGameAction = (e: Event) => {
-      const detail = (e as CustomEvent<{ action: string }>).detail;
-      if (!gameHandleRef.current) return;
-
-      if (detail.action === 'select') {
-        // Scroll canvas into view and show selection screen
-        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        gameHandleRef.current.showSelection();
-        // Focus canvas so keyboard input works immediately
-        canvas.focus();
-      }
-    };
-
-    window.addEventListener('game:action', handleGameAction);
-
     return () => {
       observer.disconnect();
-      window.removeEventListener('game:action', handleGameAction);
       if (gameHandleRef.current) gameHandleRef.current.cleanup();
       input.destroy();
     };

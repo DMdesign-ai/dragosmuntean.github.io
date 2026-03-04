@@ -216,19 +216,25 @@ export function drawCharacterSelect(
 ) {
   drawBackground(ctx, width, height);
 
+  // Responsive font sizes — ensure a readable minimum
+  const titleSize = Math.max(12, Math.floor(width * 0.04));
+  const labelSize = Math.max(10, Math.floor(width * 0.028));
+  const descSize = Math.max(8, Math.floor(width * 0.022));
+  const promptSize = Math.max(9, Math.floor(width * 0.025));
+
   // Title
   ctx.fillStyle = '#00ff41';
-  ctx.font = '10px "Press Start 2P", monospace';
+  ctx.font = `${titleSize}px "Press Start 2P", monospace`;
   ctx.textAlign = 'center';
-  ctx.fillText('SELECT YOUR MODE', width / 2, height * 0.18);
+  ctx.fillText('SELECT YOUR MODE', width / 2, height * 0.15);
 
-  // Two selection boxes
-  const boxW = Math.min(90, width * 0.38);
-  const boxH = 110;
-  const gap = 12;
+  // Two selection boxes — responsive sizing
+  const boxW = Math.max(110, Math.min(160, width * 0.38));
+  const boxH = Math.max(130, Math.min(180, height * 0.45));
+  const gap = 20;
   const totalW = boxW * 2 + gap;
   const startX = (width - totalW) / 2;
-  const boxY = height * 0.26;
+  const boxY = height * 0.22;
 
   const modes: GameMode[] = ['road', 'trail'];
   modes.forEach((mode, i) => {
@@ -250,38 +256,40 @@ export function drawCharacterSelect(
     ctx.strokeRect(bx, boxY, boxW, boxH);
     ctx.globalAlpha = 1;
 
-    // Mode label
+    // Mode label — well below top border
     ctx.fillStyle = isSelected ? '#00ff41' : '#4a4a4a';
-    ctx.font = '7px "Press Start 2P", monospace';
-    ctx.fillText(config.label, bx + boxW / 2, boxY + 18);
+    ctx.font = `${labelSize}px "Press Start 2P", monospace`;
+    ctx.fillText(config.label, bx + boxW / 2, boxY + 28);
 
-    // Draw sample obstacle sprite centered in box
+    // Draw sample obstacle sprites centered in box with ample spacing
+    const spriteY = boxY + 44;
     const sampleSprite = OBSTACLE_SPRITES[mode][config.obstacleTypes[0]];
     if (sampleSprite) {
       const spriteW = sampleSprite[0].length * 2;
       const spriteH = sampleSprite.length * 2;
-      drawSprite(ctx, sampleSprite, bx + (boxW - spriteW) / 2, boxY + 32, 2);
+      drawSprite(ctx, sampleSprite, bx + (boxW - spriteW) / 2, spriteY, 2);
 
-      // Draw second obstacle below
+      // Draw second obstacle below with more gap
       const sprite2 = OBSTACLE_SPRITES[mode][config.obstacleTypes[1]];
       if (sprite2) {
         const s2W = sprite2[0].length * 2;
-        drawSprite(ctx, sprite2, bx + (boxW - s2W) / 2, boxY + 32 + spriteH + 6, 2);
+        drawSprite(ctx, sprite2, bx + (boxW - s2W) / 2, spriteY + spriteH + 12, 2);
       }
     }
 
-    // Description
+    // Description — well above bottom border
     ctx.fillStyle = isSelected ? '#00cc33' : '#3a3a3a';
-    ctx.font = '5px "Press Start 2P", monospace';
-    ctx.fillText(config.description, bx + boxW / 2, boxY + boxH - 8);
+    ctx.font = `${descSize}px "Press Start 2P", monospace`;
+    ctx.fillText(config.description, bx + boxW / 2, boxY + boxH - 14);
   });
 
-  // Blinking prompt
+  // Blinking prompt — more space below boxes
   if (Math.floor(frameCount / 30) % 2 === 0) {
     ctx.fillStyle = '#00ff41';
-    ctx.font = '6px "Press Start 2P", monospace';
-    ctx.fillText('[LEFT/RIGHT] SELECT', width / 2, height * 0.82);
-    ctx.fillText('[SPACE] START', width / 2, height * 0.82 + 14);
+    ctx.font = `${promptSize}px "Press Start 2P", monospace`;
+    const promptY = boxY + boxH + 36;
+    ctx.fillText('[LEFT/RIGHT] SELECT', width / 2, promptY);
+    ctx.fillText('[SPACE] START', width / 2, promptY + promptSize + 10);
   }
 
   ctx.textAlign = 'start';
