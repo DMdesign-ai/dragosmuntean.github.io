@@ -39,16 +39,49 @@ export function drawLaneLines(
   const laneCount = 3;
   const laneWidth = width / (laneCount + 1);
 
-  for (let lane = 1; lane <= laneCount; lane++) {
-    const x = Math.floor(lane * laneWidth);
+  if (mode === 'trail') {
+    // Zig-zag trail lines — winding path feel
+    const segLen = 10;    // vertical length of each zig or zag segment
+    const amplitude = 5;  // horizontal offset per zig/zag
+    ctx.strokeStyle = config.laneLineColor;
+    ctx.lineWidth = GAME.laneLineWidth;
 
-    for (
-      let y = (scrollOffset % GAME.laneLineSpacing) - GAME.laneLineDashLength;
-      y < height;
-      y += GAME.laneLineSpacing
-    ) {
-      ctx.fillStyle = config.laneLineColor;
-      ctx.fillRect(x, Math.floor(y), GAME.laneLineWidth, GAME.laneLineDashLength);
+    for (let lane = 1; lane <= laneCount; lane++) {
+      const baseX = Math.floor(lane * laneWidth);
+      ctx.beginPath();
+
+      // Start above screen to avoid gaps at the top
+      const startY = (scrollOffset % (segLen * 2)) - segLen * 2;
+      let first = true;
+
+      for (let y = startY; y < height + segLen; y += segLen) {
+        // Alternate left/right based on segment index
+        const segIndex = Math.floor((y - startY) / segLen);
+        const xOff = segIndex % 2 === 0 ? -amplitude : amplitude;
+
+        if (first) {
+          ctx.moveTo(baseX + xOff, Math.floor(y));
+          first = false;
+        } else {
+          ctx.lineTo(baseX + xOff, Math.floor(y));
+        }
+      }
+
+      ctx.stroke();
+    }
+  } else {
+    // Straight dashed lane lines for road mode
+    for (let lane = 1; lane <= laneCount; lane++) {
+      const x = Math.floor(lane * laneWidth);
+
+      for (
+        let y = (scrollOffset % GAME.laneLineSpacing) - GAME.laneLineDashLength;
+        y < height;
+        y += GAME.laneLineSpacing
+      ) {
+        ctx.fillStyle = config.laneLineColor;
+        ctx.fillRect(x, Math.floor(y), GAME.laneLineWidth, GAME.laneLineDashLength);
+      }
     }
   }
 
