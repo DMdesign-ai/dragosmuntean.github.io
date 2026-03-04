@@ -21,6 +21,7 @@ import {
   drawCoin,
   drawDoor,
   drawPlayer,
+  drawSpeechBubble,
   drawGameOver,
   drawScoreHUD,
   drawDoorTransition,
@@ -409,6 +410,12 @@ function render(
   }
 
   drawPlayer(ctx, state.player, mode);
+
+  // Trail runner sings running-themed phrases
+  if (mode === 'trail' && state.player.alive && !state.gameOver) {
+    drawSpeechBubble(ctx, state.player, state.frameCount);
+  }
+
   drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
 
   if (state.gameOver) {

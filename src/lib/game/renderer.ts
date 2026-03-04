@@ -96,6 +96,105 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, player: PlayerState, m
   ctx.globalAlpha = 1;
 }
 
+// --- Trail runner speech bubble ---
+
+const TRAIL_PHRASES = [
+  "♪ Be runnin' up that road ♪",
+  "♪ Be runnin' up that hill ♪",
+  "♪ Be runnin' up that buildin' ♪",
+  '♪ If I only could, ooh ♪',
+];
+
+const BUBBLE_SHOW_FRAMES = 140;  // ~2.3 seconds visible
+const BUBBLE_CYCLE_FRAMES = 480; // total cycle length (~8 seconds)
+
+/**
+ * Draw a speech bubble above the trail runner singing running-themed phrases.
+ */
+export function drawSpeechBubble(
+  ctx: CanvasRenderingContext2D,
+  player: PlayerState,
+  frameCount: number,
+) {
+  const cyclePos = frameCount % BUBBLE_CYCLE_FRAMES;
+  if (cyclePos >= BUBBLE_SHOW_FRAMES) return; // hidden portion of cycle
+
+  // Pick phrase based on which cycle we're in
+  const phraseIndex = Math.floor(frameCount / BUBBLE_CYCLE_FRAMES) % TRAIL_PHRASES.length;
+  const text = TRAIL_PHRASES[phraseIndex];
+
+  // Fade in/out
+  const fadeInFrames = 15;
+  const fadeOutFrames = 20;
+  let alpha = 1;
+  if (cyclePos < fadeInFrames) {
+    alpha = cyclePos / fadeInFrames;
+  } else if (cyclePos > BUBBLE_SHOW_FRAMES - fadeOutFrames) {
+    alpha = (BUBBLE_SHOW_FRAMES - cyclePos) / fadeOutFrames;
+  }
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  // Measure text to size bubble
+  ctx.font = '6px "Press Start 2P", monospace';
+  const textWidth = ctx.measureText(text).width;
+  const padX = 6;
+  const padY = 5;
+  const bubbleW = textWidth + padX * 2;
+  const bubbleH = 14 + padY;
+  const bubbleX = Math.floor(player.x + player.width / 2 - bubbleW / 2);
+  const bubbleY = Math.floor(player.y - bubbleH - 8);
+
+  // Bubble background
+  ctx.fillStyle = '#0a0e0a';
+  ctx.strokeStyle = '#00ff41';
+  ctx.lineWidth = 1;
+
+  // Rounded rectangle
+  const r = 3;
+  ctx.beginPath();
+  ctx.moveTo(bubbleX + r, bubbleY);
+  ctx.lineTo(bubbleX + bubbleW - r, bubbleY);
+  ctx.arcTo(bubbleX + bubbleW, bubbleY, bubbleX + bubbleW, bubbleY + r, r);
+  ctx.lineTo(bubbleX + bubbleW, bubbleY + bubbleH - r);
+  ctx.arcTo(bubbleX + bubbleW, bubbleY + bubbleH, bubbleX + bubbleW - r, bubbleY + bubbleH, r);
+  ctx.lineTo(bubbleX + r, bubbleY + bubbleH);
+  ctx.arcTo(bubbleX, bubbleY + bubbleH, bubbleX, bubbleY + bubbleH - r, r);
+  ctx.lineTo(bubbleX, bubbleY + r);
+  ctx.arcTo(bubbleX, bubbleY, bubbleX + r, bubbleY, r);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Small triangle pointer pointing down toward player
+  const tipX = Math.floor(player.x + player.width / 2);
+  const tipY = bubbleY + bubbleH + 4;
+  ctx.fillStyle = '#0a0e0a';
+  ctx.beginPath();
+  ctx.moveTo(tipX - 3, bubbleY + bubbleH - 1);
+  ctx.lineTo(tipX + 3, bubbleY + bubbleH - 1);
+  ctx.lineTo(tipX, tipY);
+  ctx.closePath();
+  ctx.fill();
+  // Pointer border lines
+  ctx.strokeStyle = '#00ff41';
+  ctx.beginPath();
+  ctx.moveTo(tipX - 3, bubbleY + bubbleH);
+  ctx.lineTo(tipX, tipY);
+  ctx.lineTo(tipX + 3, bubbleY + bubbleH);
+  ctx.stroke();
+
+  // Text
+  ctx.fillStyle = '#00ff41';
+  ctx.font = '6px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, bubbleX + bubbleW / 2, bubbleY + padY + 8);
+  ctx.textAlign = 'start';
+
+  ctx.restore();
+}
+
 /**
  * Draw the GAME OVER overlay.
  */
