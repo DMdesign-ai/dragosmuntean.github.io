@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { Content } = await render(project);
-const { title, description, company, role, duration, tags, impact, testimonials } = project.data;
+const { title, description, company, role, duration, tags, impact, testimonials, image } = project.data;
 ---
 
 <BaseLayout title={`${title} — Portfolio`} description={description}>
@@ -67,6 +67,18 @@ const { title, description, company, role, duration, tags, impact, testimonials 
           </div>
         )}
       </div>
+
+      <!-- Hero image -->
+      {image && (
+        <div class="border border-card-border mb-8 overflow-hidden">
+          <img
+            src={`${import.meta.env.BASE_URL}${image}`}
+            alt={`${title} — project screenshot`}
+            class="w-full h-auto block"
+            loading="eager"
+          />
+        </div>
+      )}
 
       <!-- Impact metrics -->
       {impact.length > 0 && (

@@ -8,7 +8,10 @@ import { projects } from '../../lib/data';
   <HeroBlock />
 
   <div class="mt-8">
-    <h2 class="text-center text-muted text-xs tracking-widest mb-4">--- PROJECTS ---</h2>
+    <h2 class="text-center text-muted text-xs tracking-widest mb-2">--- PROJECTS ---</h2>
+    <p class="text-center text-[10px] text-door-cyan mb-4 blink">
+      RUN INTO A PORTAL TO ENTER
+    </p>
     {projects.map((project) => (
       <ProjectCard project={project} />
     ))}
