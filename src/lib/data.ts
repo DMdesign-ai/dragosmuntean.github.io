@@ -1,4 +1,4 @@
-import type { Project, LinkedInPost, AIBoss, SocialLink } from './types';
+import type { Project, BlogArticle, AIBoss, SocialLink } from './types';
 
 export const projects: Project[] = [
   {
@@ -33,36 +33,30 @@ export const projects: Project[] = [
   },
 ];
 
-export const linkedInPosts: LinkedInPost[] = [
+export const blogArticles: BlogArticle[] = [
   {
-    id: 'scroll-01',
-    scrollNumber: 1,
-    title: 'Why I Build Software Like I Train for Marathons',
-    description:
-      'Consistency beats intensity. Small daily commits compound into something extraordinary.',
-    points: 2400,
-    likes: '2.4K',
-    comments: 186,
+    id: 'figma-plugins',
+    slug: 'from-zero-to-figma-plugins',
+    title: 'From 0 to Figma Plugins and SVG Transform Tools',
+    description: '43 commits, 4 rewrites. A Figma plugin + web tool for SVG icon normalization, built with Claude Code.',
+    date: 'MAR 2026',
+    tags: ['Claude Code', 'Figma Plugin', 'SVG'],
   },
   {
-    id: 'scroll-02',
-    scrollNumber: 2,
-    title: 'The Unexpected Lesson From My First DNF',
-    description:
-      'Did Not Finish. Three words that taught me more about product development than any sprint retro.',
-    points: 1800,
-    likes: '1.8K',
-    comments: 94,
+    id: 'agent-2-ui',
+    slug: 'agent-2-ui',
+    title: 'Agent 2 UI',
+    description: "We're about to stop designing interfaces. Google's A2UI and Disco show where we're headed.",
+    date: 'JAN 2026',
+    tags: ['AI', 'UX Design', 'A2UI'],
   },
   {
-    id: 'scroll-03',
-    scrollNumber: 3,
-    title: 'I Shipped an App at Mile 26 of a Marathon',
-    description:
-      'The CI/CD pipeline was green. I hit merge from my Apple Watch at the 26-mile mark.',
-    points: 5100,
-    likes: '5.1K',
-    comments: 312,
+    id: 'calisthenics-figma',
+    slug: 'beginner-calisthenics-figma-make',
+    title: 'Beginner Calisthenics Program — in Figma Make',
+    description: 'Design systems + Make automation = AI-assisted dev that doesn\'t sacrifice design quality.',
+    date: 'AUG 2025',
+    tags: ['Figma', 'Design Systems', 'AI'],
   },
 ];
 

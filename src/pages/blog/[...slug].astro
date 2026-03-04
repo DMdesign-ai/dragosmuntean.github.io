@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, description, date, tags } = post.data;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={`${title} — Blog`} description={description}>
+  <div class="min-h-screen bg-game-bg text-terminal-green">
+    <!-- Back navigation bar -->
+    <header class="h-10 flex items-center border-b border-hud-border px-4 text-xs font-mono">
+      <a
+        href={`${import.meta.env.BASE_URL}`}
+        class="text-terminal-dim hover:text-terminal-green transition-colors"
+      >
+        &lt; BACK TO GAME
+      </a>
+      <span class="ml-auto font-pixel text-[10px] text-muted-green">BLOG</span>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 py-12">
+      <!-- Post header block (terminal style) -->
+      <div class="bg-card-bg border border-card-border p-6 mb-8">
+        <div class="text-muted text-xs mb-2 font-mono">$ cat post.md</div>
+        <h1 class="font-pixel text-lg text-terminal-green mb-4">{title}</h1>
+        <p class="text-muted-green text-sm mb-4 font-mono">{description}</p>
+
+        <div class="flex items-center gap-4 text-xs font-mono">
+          <div>
+            <span class="text-muted">DATE:</span>{' '}
+            <span class="text-terminal-green">{formattedDate}</span>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        {tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mt-4">
+            {tags.map((tag: string) => (
+              <span class="text-xs bg-game-bg border border-card-border px-2 py-1 font-mono text-terminal-dim">
+                [{tag}]
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- MDX content with terminal prose styling -->
+      <div class="prose-terminal font-mono">
+        <Content />
+      </div>
+
+      <!-- Back to game CTA -->
+      <div class="mt-16 text-center">
+        <a
+          href={`${import.meta.env.BASE_URL}`}
+          class="inline-block border border-terminal-green px-6 py-3 text-sm font-pixel hover:bg-terminal-green hover:text-game-bg transition-colors"
+        >
+          [RETURN TO GAME]
+        </a>
+      </div>
+    </main>
+  </div>
+</BaseLayout>

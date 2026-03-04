@@ -1,0 +1,40 @@
+---
+title: "From 0 to Figma Plugins and SVG Transform Tools"
+description: "I kept hitting the same problem with icons — so I built a Figma plugin and web tool to normalize SVGs. 43 commits, 4 major rewrites, and a lot of SVG path math."
+date: 2026-03-03
+tags: ["Claude Code", "Figma Plugin", "Design Systems", "SVG"]
+---
+
+I kept hitting the same problem with icons.
+
+You pull them from different sources, drop them into your design system, and nothing lines up. Stroke weights are all over the place. Padding's inconsistent. And when you need 16dp, 24dp, and 32dp versions that all look optically the same at 1dp line weight? That's hours of manual pixel-pushing.
+
+So I built a thing to fix it.
+
+## The Tools
+
+A web tool where you drag & drop SVGs and get normalized output, and a Figma plugin that does it right inside the file. Fits icons to Material Design keyline safe areas, normalizes strokes to 1dp across all sizes, converts strokes to fills. At 16dp it detects when interior details get too dense and reduces them for readability.
+
+43 commits. 4 major rewrites.
+
+## The Bugs That Bit Me
+
+Some things that bit me: Figma's `outlineStroke()` API silently fails on strokes thinner than ~1dp. Returns geometry that looks valid but is actually empty. That was a fun afternoon.
+
+`figma.flatten()` only unions fills. Does NOT outline strokes. Nowhere in the docs.
+
+My favorite bug though — compensating thin line weight by expanding the filled shapes just... closes all the gaps between them. Your carefully designed icon becomes a solid black blob. The fix was a proportional formula `max(0, 1 - scaleFactor)` that compensates just enough without destroying everything.
+
+## Claude Code as Pair Programmer
+
+I used Claude Code (CLI) as my pair-programmer for the whole thing. Node.js/TypeScript, Figma Plugin API, and way more SVG path math than I bargained for. Affine transforms, bounding box computation, evenodd fill rules.
+
+The web tool is vanilla JS. No build tools, no frameworks. Just HTML files that work.
+
+## What I Learned
+
+Biggest thing I learned: using an AI coding assistant on a real project is nothing like following a tutorial. The trick is being specific. A screenshot + "the 16dp lines are too thin" gets you a fix fast. "It doesn't work" gets you nothing useful.
+
+43 commits in a few sessions. From zero to working Figma plugin + web tool. The SVG math alone would've taken me forever on my own.
+
+Happy building!

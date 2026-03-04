@@ -1,17 +1,17 @@
 ---
 import LinkedInCard from './LinkedInCard.astro';
 import BossCard from './BossCard.astro';
-import { linkedInPosts, aiBosses } from '../../lib/data';
+import { blogArticles, aiBosses } from '../../lib/data';
 ---
 
 <aside class="w-[34%] h-full overflow-y-auto p-5 border-l border-hud-border shrink-0">
   <div class="flex justify-between items-center mb-4">
-    <h2 class="text-muted text-xs tracking-widest">--- LINKEDIN POSTS ---</h2>
-    <span class="text-terminal-green text-xs">SCROLLS: 0/3</span>
+    <h2 class="text-muted text-xs tracking-widest">--- BLOG POSTS ---</h2>
+    <span class="text-terminal-green text-xs">POSTS: {blogArticles.length}</span>
   </div>
 
-  {linkedInPosts.map((post) => (
-    <LinkedInCard post={post} />
+  {blogArticles.map((article, i) => (
+    <LinkedInCard article={article} index={i} />
   ))}
 
   <div class="flex justify-between items-center mt-8 mb-4">

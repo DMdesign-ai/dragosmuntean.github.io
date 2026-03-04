@@ -9,14 +9,13 @@ export interface Project {
   category: 'work' | 'personal';
 }
 
-export interface LinkedInPost {
+export interface BlogArticle {
   id: string;
-  scrollNumber: number;
+  slug: string;
   title: string;
   description: string;
-  points: number;
-  likes: string;
-  comments: number;
+  date: string;
+  tags: string[];
 }
 
 export interface AIBoss {
