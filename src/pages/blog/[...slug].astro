@@ -37,11 +37,11 @@ const formattedDate = date.toLocaleDateString('en-US', {
     <main class="max-w-3xl mx-auto px-6 py-12">
       <!-- Cover image with retro green overlay -->
       {image && (
-        <div class="relative w-full h-56 overflow-hidden border border-card-border mb-8">
+        <div class="relative w-full overflow-hidden border border-card-border mb-8">
           <img
             src={`${import.meta.env.BASE_URL}${image}`}
             alt={title}
-            class="w-full h-full object-cover grayscale brightness-50"
+            class="w-full h-auto block grayscale brightness-50"
           />
           <div class="absolute inset-0 bg-terminal-green/15 mix-blend-overlay"></div>
           <div class="absolute inset-0 bg-game-bg/30"></div>
