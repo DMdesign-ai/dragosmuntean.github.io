@@ -24,6 +24,11 @@ export default function GameWorld() {
     }, 800);
   }, []);
 
+  const handleGameStart = useCallback(() => {
+    // On mobile, scroll the game canvas into view when play begins
+    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -41,6 +46,7 @@ export default function GameWorld() {
       ctx.imageSmoothingEnabled = false;
       gameHandleRef.current = createGameLoop(ctx, width, height, input, DOOR_PROJECTS, {
         onDoorEnter: handleDoorEnter,
+        onGameStart: handleGameStart,
       });
     };
 
@@ -60,7 +66,7 @@ export default function GameWorld() {
       if (gameHandleRef.current) gameHandleRef.current.cleanup();
       input.destroy();
     };
-  }, [handleDoorEnter]);
+  }, [handleDoorEnter, handleGameStart]);
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>

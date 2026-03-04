@@ -37,6 +37,7 @@ export interface DoorProjectData {
 
 export interface GameCallbacks {
   onDoorEnter: (projectSlug: string) => void;
+  onGameStart?: () => void;
 }
 
 export interface GameHandle {
@@ -203,6 +204,7 @@ function update(
         state.started = true;
         input.keys['Enter'] = false;
         input.keys[' '] = false;
+        callbacks.onGameStart?.();
         return;
       }
     }
@@ -215,6 +217,7 @@ function update(
       // Clear keys to prevent immediate movement
       input.keys['Enter'] = false;
       input.keys[' '] = false;
+      callbacks.onGameStart?.();
     }
     return;
   }
