@@ -25,11 +25,11 @@ export const COLORS = {
 } as const;
 
 export const PHYSICS = {
-  playerSpeed: 4,
-  playerVerticalSpeed: 3,
-  baseScrollSpeed: 2.5,
-  maxScrollSpeed: 8,
-  speedIncreaseRate: 0.0005, // per frame
+  playerSpeed: 3.5,
+  playerVerticalSpeed: 2.5,
+  baseScrollSpeed: 1.8,
+  maxScrollSpeed: 6,
+  speedIncreaseRate: 0.0003, // per frame
 } as const;
 
 export const GAME = {

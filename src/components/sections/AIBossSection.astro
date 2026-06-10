@@ -1,23 +1,12 @@
 ---
-import LinkedInCard from './LinkedInCard.astro';
-import { blogArticles } from '../../lib/data';
+
 ---
 
-<aside class="w-[34%] h-full overflow-y-auto p-5 border-l border-hud-border shrink-0">
+<section class="px-4 py-6">
   <div class="flex justify-between items-center mb-4">
-    <h2 class="text-muted text-xs tracking-widest">--- BLOG POSTS ---</h2>
-    <span class="text-terminal-green text-xs">POSTS: {blogArticles.length}</span>
-  </div>
-
-  {blogArticles.map((article, i) => (
-    <LinkedInCard article={article} index={i} />
-  ))}
-
-  <div class="flex justify-between items-center mt-8 mb-4">
     <h2 class="text-red-accent text-xs tracking-widest font-bold">!! BOSS ZONE: AI PROJECTS !!</h2>
     <span class="text-muted text-xs">LOCKED</span>
   </div>
-
   <div class="bg-card-bg border-l-2 border-card-border p-4 mb-3" data-animate="card">
     <div class="text-center py-4">
       <div class="text-2xl mb-2">🚧</div>
@@ -29,4 +18,4 @@ import { blogArticles } from '../../lib/data';
       <p class="text-muted text-[9px] mt-1">15% COMPLETE</p>
     </div>
   </div>
-</aside>
+</section>

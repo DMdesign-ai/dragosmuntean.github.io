@@ -10,12 +10,26 @@ const DOOR_PROJECTS: DoorProjectData[] = [
   { slug: 'help-center-improvements', name: 'HELP CENTER' },
 ];
 
+// Base path (root since using custom domain)
+const BASE_PATH = '';
 // Base path from Astro config
 const BASE_PATH = '/dragosmuntean.github.io';
 
 export default function GameWorld() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gameHandleRef = useRef<GameHandle | null>(null);
+
+  const handleDoorEnter = useCallback((projectSlug: string) => {
+    setTimeout(() => {
+      window.location.href = `${BASE_PATH}/projects/${projectSlug}`;
+    }, 800);
+  }, []);
+
+  const handleGameStart = useCallback(() => {
+    // On mobile, scroll the game canvas into view when play begins
+    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleDoorEnter = useCallback((projectSlug: string) => {
     // Delay navigation to let the transition animation play
@@ -32,20 +46,21 @@ export default function GameWorld() {
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
 
-    const input = new InputHandler();
-    let gameCleanup: (() => void) | null = null;
+    const input = new InputHandler(canvas);
 
     const startGame = (width: number, height: number) => {
-      if (gameCleanup) gameCleanup();
+      if (gameHandleRef.current) gameHandleRef.current.cleanup();
       canvas.width = width;
       canvas.height = height;
       ctx.imageSmoothingEnabled = false;
+      gameHandleRef.current = createGameLoop(ctx, width, height, input, DOOR_PROJECTS, {
+        onDoorEnter: handleDoorEnter,
+        onGameStart: handleGameStart,
       gameCleanup = createGameLoop(ctx, width, height, input, DOOR_PROJECTS, {
         onDoorEnter: handleDoorEnter,
       });
     };
 
-    // Use ResizeObserver to track the container size reliably
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
@@ -59,9 +74,10 @@ export default function GameWorld() {
 
     return () => {
       observer.disconnect();
-      if (gameCleanup) gameCleanup();
+      if (gameHandleRef.current) gameHandleRef.current.cleanup();
       input.destroy();
     };
+  }, [handleDoorEnter, handleGameStart]);
   }, [handleDoorEnter]);
 
   return (
@@ -70,6 +86,7 @@ export default function GameWorld() {
         ref={canvasRef}
         style={{ display: 'block', width: '100%', height: '100%' }}
         tabIndex={0}
+        aria-label="Vertical runner game — select a mode, dodge obstacles, and enter portals to view projects"
         aria-label="Vertical runner game — dodge obstacles and enter portals to view projects"
       />
     </div>

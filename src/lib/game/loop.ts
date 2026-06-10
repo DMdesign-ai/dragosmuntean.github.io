@@ -1,5 +1,6 @@
 import { PHYSICS, GAME } from '../gameConstants';
 import type { InputHandler } from './input';
+import type { GameMode } from './modes';
 import {
   createObstacle,
   createCoin,
@@ -20,9 +21,11 @@ import {
   drawCoin,
   drawDoor,
   drawPlayer,
+  drawSpeechBubble,
   drawGameOver,
   drawScoreHUD,
   drawDoorTransition,
+  drawCharacterSelect,
 } from './renderer';
 
 // --- Public types for GameWorld.tsx ---
@@ -34,11 +37,59 @@ export interface DoorProjectData {
 
 export interface GameCallbacks {
   onDoorEnter: (projectSlug: string) => void;
+  onGameStart?: () => void;
+}
+
+export interface GameHandle {
+  cleanup: () => void;
+  showSelection: () => void;
+}
+
+// --- Session persistence helpers ---
+
+const STORAGE_KEY = 'runner_game_state';
+
+interface SavedGameState {
+  mode: GameMode;
+  score: number;
+  highScore: number;
+  scrollSpeed: number;
+  frameCount: number;
+}
+
+function saveGameState(state: GameState) {
+  try {
+    const saved: SavedGameState = {
+      mode: state.selectedMode,
+      score: state.score,
+      highScore: state.highScore,
+      scrollSpeed: state.scrollSpeed,
+      frameCount: state.frameCount,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  } catch { /* silently fail in SSR / private browsing */ }
+}
+
+function loadGameState(): SavedGameState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(STORAGE_KEY); // consume once
+    return JSON.parse(raw) as SavedGameState;
+  } catch { return null; }
 }
 
 // --- Internal game state ---
 
+type GamePhase = 'selecting' | 'playing';
+
 interface GameState {
+  phase: GamePhase;
+  selectedMode: GameMode;
+  selectIndex: number; // 0 = road, 1 = trail
+  selectFrameCount: number;
+  selectDebounce: number; // prevent rapid toggling
+
   obstacles: Obstacle[];
   coins: Coin[];
   doors: Door[];
@@ -66,6 +117,12 @@ function initGameState(
   prevHighScore: number = 0,
 ): GameState {
   return {
+    phase: 'selecting',
+    selectedMode: 'road',
+    selectIndex: 0,
+    selectFrameCount: 0,
+    selectDebounce: 0,
+
     obstacles: [],
     coins: [],
     doors: [],
@@ -98,21 +155,95 @@ function update(
   // Freeze everything during door transition
   if (state.navigating) return;
 
+  // ========== CHARACTER SELECTION PHASE ==========
+  if (state.phase === 'selecting') {
+    state.selectFrameCount++;
+
+    // Debounce counter
+    if (state.selectDebounce > 0) {
+      state.selectDebounce--;
+    }
+
+    // Left/right to toggle selection (keyboard / swipe)
+    if (state.selectDebounce === 0) {
+      if (input.left && state.selectIndex > 0) {
+        state.selectIndex = 0;
+        state.selectDebounce = 10;
+      }
+      if (input.right && state.selectIndex < 1) {
+        state.selectIndex = 1;
+        state.selectDebounce = 10;
+      }
+    }
+
+    // Tap-to-select: detect which mode box was tapped and start immediately
+    const tap = input.consumeTap();
+    if (tap) {
+      // Recompute box bounds (must match drawCharacterSelect in renderer.ts)
+      const gap = Math.max(24, Math.floor(width * 0.06));
+      const boxW = Math.max(120, Math.floor((width - gap * 3) / 2));
+      const boxH = Math.max(140, Math.floor(height * 0.48));
+      const totalW = boxW * 2 + gap;
+      const startX = (width - totalW) / 2;
+      const boxY = Math.floor(height * 0.22);
+
+      const box0x = startX;
+      const box1x = startX + boxW + gap;
+
+      let tappedIndex = -1;
+      if (tap.x >= box0x && tap.x <= box0x + boxW && tap.y >= boxY && tap.y <= boxY + boxH) {
+        tappedIndex = 0;
+      } else if (tap.x >= box1x && tap.x <= box1x + boxW && tap.y >= boxY && tap.y <= boxY + boxH) {
+        tappedIndex = 1;
+      }
+
+      if (tappedIndex >= 0) {
+        state.selectIndex = tappedIndex;
+        state.selectedMode = tappedIndex === 0 ? 'road' : 'trail';
+        state.phase = 'playing';
+        state.started = true;
+        input.keys['Enter'] = false;
+        input.keys[' '] = false;
+        callbacks.onGameStart?.();
+        return;
+      }
+    }
+
+    // Confirm selection (keyboard: Space/Enter)
+    if (input.confirm) {
+      state.selectedMode = state.selectIndex === 0 ? 'road' : 'trail';
+      state.phase = 'playing';
   // Wait for first input to start the game
   if (!state.started) {
     if (input.left || input.right || input.up || input.down) {
       state.started = true;
+      // Clear keys to prevent immediate movement
+      input.keys['Enter'] = false;
+      input.keys[' '] = false;
+      callbacks.onGameStart?.();
     }
     return;
   }
 
-  // Game over — wait for restart
+  // ========== PLAYING PHASE ==========
+
+  // Escape → back to selection screen
+  if (input.escape) {
+    const hs = state.highScore;
+    const stars = state.stars;
+    Object.assign(state, initGameState(width, height, projects, hs));
+    state.stars = stars;
+    input.keys['Escape'] = false; // consume the key
+    return;
+  }
+
+  // Game over — wait for restart → back to selection
   if (state.gameOver) {
     if (input.restart) {
-      // Reset but keep high score
       const hs = state.highScore;
       const stars = state.stars;
       Object.assign(state, initGameState(width, height, projects, hs));
+      state.stars = stars;
       state.stars = stars; // reuse stars
       state.started = true;
     }
@@ -136,28 +267,19 @@ function update(
   // --- Player movement ---
   const p = state.player;
 
-  // Invincibility countdown
   if (p.invincibleTimer > 0) {
     p.invincibleTimer -= 1;
   }
 
-  if (input.left) {
-    p.x -= PHYSICS.playerSpeed;
-  }
-  if (input.right) {
-    p.x += PHYSICS.playerSpeed;
-  }
-  if (input.up) {
-    p.y -= PHYSICS.playerVerticalSpeed;
-  }
-  if (input.down) {
-    p.y += PHYSICS.playerVerticalSpeed;
-  }
+  if (input.left) p.x -= PHYSICS.playerSpeed;
+  if (input.right) p.x += PHYSICS.playerSpeed;
+  if (input.up) p.y -= PHYSICS.playerVerticalSpeed;
+  if (input.down) p.y += PHYSICS.playerVerticalSpeed;
 
   // Clamp player to screen bounds
   if (p.x < 6) p.x = 6;
   if (p.x + p.width > width - 6) p.x = width - 6 - p.width;
-  if (p.y < 30) p.y = 30; // leave room for HUD
+  if (p.y < 30) p.y = 30;
   if (p.y + p.height > height - 4) p.y = height - 4 - p.height;
 
   // Run animation
@@ -167,7 +289,7 @@ function update(
     p.animTimer = 0;
   }
 
-  // --- Spawn obstacles ---
+  // --- Spawn obstacles (mode-aware) ---
   state.spawnTimer++;
   const currentSpawnInterval = Math.max(
     GAME.minSpawnInterval,
@@ -176,9 +298,8 @@ function update(
 
   if (state.spawnTimer >= currentSpawnInterval) {
     state.spawnTimer = 0;
-    const newObs = createObstacle(width, state.scrollSpeed);
+    const newObs = createObstacle(width, state.scrollSpeed, state.selectedMode);
 
-    // Make sure new obstacle doesn't overlap existing ones near the top
     const tooClose = state.obstacles.some(
       (o) =>
         o.y < GAME.obstacleMinGap &&
@@ -197,6 +318,7 @@ function update(
     state.coins.push(createCoin(width));
   }
 
+  // --- Spawn doors ---
   // --- Spawn doors (every ~150m) ---
   state.doorSpawnTimer++;
   if (
@@ -217,10 +339,12 @@ function update(
   for (const obs of state.obstacles) {
     obs.y += state.scrollSpeed * obs.speed;
   }
-
-  // --- Move coins downward ---
   for (const coin of state.coins) {
     coin.y += state.scrollSpeed * coin.speed;
+  }
+  for (const door of state.doors) {
+    door.y += state.scrollSpeed * door.speed;
+    door.glowPhase += 0.05;
   }
 
   // --- Move doors downward ---
@@ -234,7 +358,7 @@ function update(
   state.coins = state.coins.filter((c) => c.y < height + 20 && !c.collected);
   state.doors = state.doors.filter((d) => d.y < height + 20 && !d.entered);
 
-  // --- Move stars slowly for parallax ---
+  // --- Move stars for parallax ---
   for (const star of state.stars) {
     star.y += state.scrollSpeed * 0.15;
     if (star.y > height) {
@@ -243,9 +367,9 @@ function update(
     }
   }
 
-  // --- Collision detection (AABB with shrunk hitbox for fairness) ---
+  // --- Collision detection ---
   if (p.invincibleTimer <= 0) {
-    const hitboxShrink = 6; // pixels of forgiveness on each side
+    const hitboxShrink = 6;
     const px1 = p.x + hitboxShrink;
     const py1 = p.y + hitboxShrink;
     const px2 = p.x + p.width - hitboxShrink;
@@ -258,7 +382,6 @@ function update(
       const oy2 = obs.y + obs.height - 2;
 
       if (px1 < ox2 && px2 > ox1 && py1 < oy2 && py2 > oy1) {
-        // Collision!
         state.gameOver = true;
         p.alive = false;
         if (state.score > state.highScore) {
@@ -310,18 +433,27 @@ function render(
   width: number,
   height: number,
 ) {
-  drawBackground(ctx, width, height);
-  drawStars(ctx, state.stars);
-  drawLaneLines(ctx, width, height, state.scrollOffset);
-
-  // Draw obstacles
-  for (const obs of state.obstacles) {
-    drawObstacle(ctx, obs);
+  // Character selection screen
+  if (state.phase === 'selecting') {
+    drawCharacterSelect(ctx, width, height, state.selectIndex, state.selectFrameCount);
+    return;
   }
 
-  // Draw coins
+  // Playing phase
+  const mode = state.selectedMode;
+
+  drawBackground(ctx, width, height);
+  drawStars(ctx, state.stars);
+  drawLaneLines(ctx, width, height, state.scrollOffset, mode);
+
+  for (const obs of state.obstacles) {
+    drawObstacle(ctx, obs, mode);
+  }
   for (const coin of state.coins) {
     drawCoin(ctx, coin);
+  }
+  for (const door of state.doors) {
+    drawDoor(ctx, door, state.frameCount);
   }
 
   // Draw doors
@@ -335,16 +467,13 @@ function render(
   // Draw HUD
   drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
 
-  // Pre-start prompt
-  if (!state.started) {
-    ctx.fillStyle = '#00ff41';
-    ctx.font = '8px "Press Start 2P", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('[ARROWS] TO RUN', width / 2, height / 2);
-    ctx.textAlign = 'start';
+  // Trail runner sings running-themed phrases
+  if (mode === 'trail' && state.player.alive && !state.gameOver) {
+    drawSpeechBubble(ctx, state.player, state.frameCount);
   }
 
-  // Game over overlay
+  drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
+
   if (state.gameOver) {
     drawGameOver(ctx, width, height, state.score, state.highScore);
   }
@@ -369,7 +498,15 @@ export function createGameLoop(
   let animId: number;
   let running = true;
 
-  function tick() {
+  // Fixed-timestep loop: always tick at 60fps regardless of monitor refresh rate.
+  // High-refresh-rate monitors (120Hz, 144Hz) would otherwise run the game 2x+ faster
+  // because all movement is frame-based, not time-based.
+  const TARGET_FPS = 60;
+  const FRAME_DURATION = 1000 / TARGET_FPS; // ~16.67ms
+  let lastTime = 0;
+  let accumulator = 0;
+
+  function tick(timestamp: number) {
     if (!running) return;
     update(state, input, width, height, projects, callbacks);
     // Keep rendering during navigation for the transition animation
@@ -383,8 +520,17 @@ export function createGameLoop(
 
   animId = requestAnimationFrame(tick);
 
-  return () => {
-    running = false;
-    cancelAnimationFrame(animId);
+  return {
+    cleanup: () => {
+      running = false;
+      cancelAnimationFrame(animId);
+    },
+    showSelection: () => {
+      // Reset to selection screen, preserving high score and stars
+      const hs = state.highScore;
+      const stars = state.stars;
+      Object.assign(state, initGameState(width, height, projects, hs));
+      state.stars = stars;
+    },
   };
 }

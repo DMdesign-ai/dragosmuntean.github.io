@@ -6,8 +6,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://dmdesign-ai.github.io',
-  base: '/dragosmuntean.github.io',
+  site: 'https://dragosmuntean.com',
   output: 'static',
 
   vite: {
