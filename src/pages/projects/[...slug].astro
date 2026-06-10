@@ -13,7 +13,6 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const { title, description, company, role, duration, tags, impact, testimonials, image, images } = project.data;
-const { title, description, company, role, duration, tags, impact, testimonials } = project.data;
 ---
 
 <BaseLayout title={`${title} — Portfolio`} description={description}>
