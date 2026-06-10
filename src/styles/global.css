@@ -78,6 +78,8 @@
     overflow: hidden;
     height: 100vh;
   }
+  overflow: hidden;
+  height: 100vh;
 }
 
 /* Terminal-styled prose for MDX content */

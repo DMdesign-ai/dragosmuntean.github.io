@@ -14,6 +14,8 @@ import { MODE_CONFIGS } from './modes';
 const isTouchDevice =
   typeof window !== 'undefined' &&
   ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+} from './sprites';
+import type { Obstacle, Coin, Star, PlayerState, Door } from './entities';
 
 export function drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
   ctx.fillStyle = COLORS.bg;
@@ -298,6 +300,7 @@ export function drawDoor(
 ) {
   if (door.entered) return;
 
+  // Pulsing glow behind the portal
   const glowIntensity = 0.15 + Math.sin(frameCount * 0.08) * 0.1;
   ctx.save();
   ctx.globalAlpha = glowIntensity;
@@ -307,6 +310,10 @@ export function drawDoor(
 
   drawSprite(ctx, DOOR_SPRITE, door.x, door.y, 2);
 
+  // Draw the portal sprite
+  drawSprite(ctx, DOOR_SPRITE, door.x, door.y, 2);
+
+  // Draw project name label below the portal
   ctx.fillStyle = COLORS.doorCyan;
   ctx.font = '6px "Press Start 2P", monospace';
   ctx.textAlign = 'center';
@@ -322,6 +329,7 @@ export function drawDoorTransition(
   width: number,
   height: number,
   progress: number,
+  progress: number, // 0 to 1
 ) {
   const maxRadius = Math.sqrt(width * width + height * height) / 2;
   const radius = maxRadius * progress;
@@ -333,6 +341,7 @@ export function drawDoorTransition(
   ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
   ctx.fill();
 
+  // Loading text appears after initial flash
   if (progress > 0.25) {
     ctx.fillStyle = '#0a0e0a';
     ctx.font = '10px "Press Start 2P", monospace';
