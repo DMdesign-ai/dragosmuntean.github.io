@@ -1,0 +1,517 @@
+/* ============================================================
+   RACE DOCUMENT — design system tokens
+   dragosmuntean.com v3
+   ------------------------------------------------------------
+   Two grounds, one accent, three faces.
+   Components are written once against SEMANTIC tokens
+   (--ground / --fg / --rule ...) and work on either ground.
+   Flip the ground with .on-night or .on-snow.
+   ============================================================ */
+
+/* ---- Nohemi (display) ----------------------------------------
+   The author's own woff2 builds, copied unmodified from the official
+   package (Web-TT). Not converted, not subset — the licence forbids
+   modifying the files, and the package already ships web formats.
+   Only the weights actually used are loaded. Licence: licenses/.
+   ------------------------------------------------------------- */
+@font-face {
+  font-family: 'Nohemi';
+  src: url('/fonts/Nohemi-Regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Nohemi';
+  src: url('/fonts/Nohemi-Medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Nohemi';
+  src: url('/fonts/Nohemi-SemiBold.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+
+/* ---- Satoshi (text) ------------------------------------------
+   Indian Type Foundry, ITF Free Font License. The licence explicitly
+   permits and recommends self-hosting, and forbids subsetting or format
+   conversion — so this is their variable woff2, shipped unmodified.
+   One file covers weights 300-900 and is smaller than two statics.
+   The family name here is a CSS alias; the file itself is untouched.
+   Licence: licenses/Satoshi-ITF-FFL.txt
+   ------------------------------------------------------------- */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Variable.woff2') format('woff2-variations');
+  font-weight: 300 900; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* --- raw palette: night ground --- */
+  --night:        #0E100F;
+  --night-raise:  #171A18;
+  --night-rule:   #232823;
+  --mist:         #E9EDE6;
+  --mist-dim:     #8E968B;
+  --mist-faint:   #7A8278;  /* AA 4.81:1 on night — carries 10px registry text */
+
+  /* --- raw palette: snow ground --- */
+  --snow:         #F4F5F1;
+  --snow-raise:   #EAEBE5;
+  --snow-rule:    #D8DBD1;
+  --ink:          #12150F;
+  --ink-dim:      #5E645A;
+  --ink-faint:    #676D62;  /* AA 4.87:1 on snow  — carries 10px registry text */
+
+  /* --- the one accent ---
+     hi-vis lime, pushed green. On night it may set text. On snow it is a FILL
+     only — never text — because it fails contrast on light ground. */
+  --hivis:        #A8E24C;
+  --hivis-ink:    #101705;
+
+  /* --- faces ---
+     Matched to komoot's 2025 app redesign: Nohemi for display, Satoshi
+     for text. Verified against their live site, not the press release.
+     Mono is ours — komoot has no mono, and the registry layer needs one.
+
+     Both are self-hosted from public/fonts/ — no CDN, no third-party
+     request. Licences in licenses/. */
+  --f-display: 'Nohemi', 'Satoshi', 'Helvetica Neue', Arial, sans-serif;
+  --f-read:    'Satoshi', system-ui, -apple-system, sans-serif;
+  --f-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* --- type scale ---
+     A race document has extreme contrast: an enormous wordmark,
+     tiny registry type, and very little in between. That gap is
+     deliberate — resist filling it. */
+  --t-10:   0.625rem;
+  --t-11:   0.6875rem;
+  --t-12:   0.75rem;
+  --t-14:   0.875rem;
+  --t-body: 1.0625rem;
+  --t-lead: 1.25rem;
+  --t-h3:   1.375rem;
+  --t-h2:   clamp(1.75rem, 3.4vw, 2.75rem);
+  --t-h1:   clamp(2.5rem, 7vw, 5rem);
+  --t-mark: clamp(3.5rem, 16vw, 14rem);
+
+  /* --- tracking --- */
+  --tr-mark:  -0.045em;
+  --tr-h1:    -0.035em;
+  --tr-h2:    -0.025em;
+  --tr-mono:   0.14em;
+  --tr-mono-t: 0.08em;
+
+  /* --- space: 4px base --- */
+  --s1:  0.25rem;  --s2: 0.5rem;   --s3: 0.75rem;  --s4: 1rem;
+  --s6:  1.5rem;   --s8: 2rem;     --s12: 3rem;    --s16: 4rem;
+  --s24: 6rem;     --s32: 8rem;
+
+  /* --- measure --- */
+  --measure: 64ch;
+
+  /* Width of the reading column every band centres its content in. */
+  --col: 68rem;
+
+  /* Height of the sticky document header. It sits in normal flow, so any
+     full-viewport section must subtract it or its last row falls below
+     the fold. */
+  --header-h: 2.75rem;
+
+  /* --- motion ---
+     One easing curve. Two durations. Nothing else. */
+  --ease:     cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur:      420ms;
+}
+
+/* ============================================================
+   GROUND SWITCHES
+   ============================================================ */
+
+.on-night {
+  --ground: var(--night);
+  --raise:  var(--night-raise);
+  --rule:   var(--night-rule);
+  --fg:     var(--mist);
+  --fg-dim: var(--mist-dim);
+  --fg-faint: var(--mist-faint);
+  --accent-text: var(--hivis);   /* lime is legible on night */
+  --now-bg:  transparent;        /* on night the accent sets text directly */
+  --now-fg:  var(--hivis);
+  --now-pad: 0;
+  --img-edge: oklch(1 0 0 / 0.1);  /* pure white, never a tinted neutral */
+  background: var(--ground);
+  color: var(--fg);
+}
+
+.on-snow {
+  --ground: var(--snow);
+  --raise:  var(--snow-raise);
+  --rule:   var(--snow-rule);
+  --fg:     var(--ink);
+  --fg-dim: var(--ink-dim);
+  --fg-faint: var(--ink-faint);
+  --accent-text: var(--ink);     /* lime never sets text on snow */
+  --now-bg:  var(--hivis);       /* on snow the accent can only be a fill */
+  --now-fg:  var(--hivis-ink);
+  --now-pad: 0 var(--s1);
+  --img-edge: oklch(0 0 0 / 0.1);  /* pure black, never a tinted neutral */
+  background: var(--ground);
+  color: var(--fg);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+body {
+  margin: 0;
+  font-family: var(--f-read);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  text-wrap: pretty;          /* avoid orphans in body copy */
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0; max-width: var(--measure); }
+
+:focus-visible {
+  outline: 2px solid var(--hivis);
+  outline-offset: 3px;
+}
+
+::selection { background: var(--hivis); color: var(--hivis-ink); }
+
+/* ============================================================
+   PRIMITIVES
+   ============================================================ */
+
+/* --- Registry line: mono metadata treated as document authority.
+       Used for codes, locations, dates, section markers. --- */
+.registry {
+  font-family: var(--f-mono);
+  font-size: var(--t-10);
+  font-weight: 400;
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.registry--strong { color: var(--fg-dim); }
+
+/* --- Wordmark: set enormous, tracked tight, allowed to bleed.
+       Never centred, never contained politely. --- */
+.wordmark {
+  font-family: var(--f-display);
+  font-size: var(--t-mark);
+  font-weight: 600;
+  line-height: 0.82;
+  letter-spacing: var(--tr-mark);
+  font-stretch: 100%;
+  margin: 0;
+}
+
+/* --- Spec bar: tabular figures under a hairline.
+       The workhorse of the whole system. --- */
+.specbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: var(--s4) var(--s6);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s3);
+}
+.specbar dt {
+  font-family: var(--f-mono);
+  font-size: var(--t-10);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.specbar dd {
+  margin: var(--s1) 0 0;
+  font-family: var(--f-mono);
+  font-size: var(--t-14);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+/* Wider columns for spec bars carrying long values (coordinates, timestamps). */
+.specbar--wide { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+
+/* Resolved from tokens, never from ancestry: a night section nested inside
+   a snow page (a case-study hero, say) must take the night treatment, and a
+   descendant selector like `.on-snow .specbar` would wrongly win there. */
+.specbar dd.is-now {
+  background: var(--now-bg);
+  color: var(--now-fg);
+  padding: var(--now-pad);
+  display: inline-block;
+}
+
+/* --- Log row: one dated entry. Number, title, figure. --- */
+.logrow {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  gap: var(--s4);
+  align-items: baseline;
+  padding: var(--s4) 0;
+  border-top: 1px solid var(--rule);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--dur-fast) var(--ease);
+}
+.logrow:hover { background: var(--raise); }
+.logrow__n,
+.logrow__fig {
+  font-family: var(--f-mono);
+  font-size: var(--t-11);
+  letter-spacing: var(--tr-mono-t);
+  color: var(--fg-faint);
+  font-variant-numeric: tabular-nums;
+}
+.logrow__fig { color: var(--fg-dim); }
+.logrow__t {
+  font-family: var(--f-display);
+  font-size: var(--t-lead);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+}
+.logrow__meta {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: var(--t-10);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-top: var(--s1);
+}
+
+/* --- Row preview: on hover the row opens and shows the first image from the
+       entry. grid-template-rows 0fr -> 1fr animates cleanly without touching
+       height, and a transition (not keyframes) means moving the pointer away
+       mid-open reverses smoothly instead of restarting.
+       Rows with no image never get .logrow--peek, so they simply don't open. */
+.logrow--peek .logrow__peek {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease);
+}
+.logrow--peek .logrow__peek > span {
+  overflow: hidden;
+  min-height: 0;
+}
+.logrow--peek:hover .logrow__peek,
+.logrow--peek:focus-visible .logrow__peek { grid-template-rows: 1fr; }
+
+.logrow__peek img {
+  display: block;
+  width: min(100%, 22rem);
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center top;
+  margin-top: var(--s3);
+  outline: 1px solid var(--img-edge);
+  outline-offset: -1px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.logrow--peek:hover .logrow__peek img,
+.logrow--peek:focus-visible .logrow__peek img { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .logrow--peek .logrow__peek { transition: none; }
+  .logrow__peek img { transition: none; }
+}
+/* Coarse pointers have no hover, so never hide the image behind one. */
+@media (hover: none) {
+  .logrow--peek .logrow__peek { grid-template-rows: 0fr; }
+}
+
+/* --- Withheld: a real entry whose values cannot be published.
+       Fields stay present. No redaction bars, no theatre.
+       Only the unpublishable values drop back — the ones that CAN
+       be stated read at full strength, or the entry says nothing. --- */
+.specbar dd.is-withheld { color: var(--fg-faint); }
+.tag-nda {
+  font-family: var(--f-mono);
+  font-size: var(--t-10);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  border: 1px solid var(--rule);
+  padding: var(--s1) var(--s2);
+  color: var(--fg-dim);
+  white-space: nowrap;
+}
+
+/* --- Link: ruled, not coloured. Lime only on hover. --- */
+.link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.link:hover { border-bottom-color: var(--hivis); }
+
+/* Small mono links carry a 44px hit area via a pseudo-element.
+   Inset stays under half the flex gap so neighbouring targets never overlap. */
+.hit { position: relative; }
+.hit::after { content: ''; position: absolute; inset: -14px -6px; }  /* 4px clear between neighbours */
+/* Inline-level links need a box before the pseudo-element can size against it. */
+a.hit { display: inline-block; }
+
+/* --- Marker: the single lime element permitted per screen. --- */
+.marker-now {
+  background: var(--hivis);
+  color: var(--hivis-ink);
+  font-family: var(--f-mono);
+  font-size: var(--t-10);
+  letter-spacing: var(--tr-mono);
+  text-transform: uppercase;
+  padding: var(--s1) var(--s2);
+}
+
+/* --- Reading column for case studies and notes.
+       Images are allowed to break the measure; text is not. --- */
+.prose { max-width: var(--measure); }
+.prose > * + * { margin-top: var(--s4); }
+.prose h2 {
+  font-size: var(--t-h2); letter-spacing: var(--tr-h2);
+  margin-top: var(--s16); margin-bottom: var(--s2);
+}
+.prose h3 { font-size: var(--t-h3); margin-top: var(--s8); margin-bottom: var(--s2); }
+.prose h2:first-child, .prose h3:first-child { margin-top: 0; }
+.prose p { line-height: 1.65; }
+.prose strong { font-weight: 600; }
+.prose a { color: inherit; text-decoration: underline; text-underline-offset: 3px;
+           text-decoration-color: var(--fg-faint); }
+.prose a:hover { text-decoration-color: var(--hivis); }
+.prose ul, .prose ol { padding-left: var(--s6); margin-block: var(--s4); }
+.prose li + li { margin-top: var(--s2); }
+.prose li::marker { color: var(--fg-faint); }
+.prose img {
+  display: block; width: 100%; height: auto;
+  max-width: min(100%, 76rem);
+  margin-block: var(--s12);
+  outline: 1px solid var(--img-edge);   /* untinted, so it reads as edge not dirt */
+  outline-offset: -1px;
+}
+
+/* Figures may break the measure; their captions may not. */
+.prose figure { margin: var(--s12) 0; max-width: min(100%, 76rem); }
+.prose figure img { margin-block: 0; }
+.prose figcaption {
+  margin-top: var(--s3);
+  max-width: 58ch;
+  font-family: var(--f-mono);
+  font-size: var(--t-11);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  color: var(--fg-faint);
+}
+.prose blockquote {
+  margin: var(--s8) 0; padding-left: var(--s6);
+  border-left: 2px solid var(--rule); color: var(--fg-dim);
+}
+.prose code {
+  font-family: var(--f-mono); font-size: 0.86em;
+  background: var(--raise); padding: 0.1em 0.35em;
+}
+.prose pre {
+  background: var(--raise); padding: var(--s4);
+  overflow-x: auto; font-size: var(--t-14);
+}
+.prose pre code { background: none; padding: 0; }
+.prose hr { border: 0; border-top: 1px solid var(--rule); margin-block: var(--s12); }
+
+/* ============================================================
+   MOTION
+   Interactive state changes use transitions, so they can be
+   interrupted mid-flight. Keyframes are reserved for one-shot
+   sequences. Nothing loops, nothing moves while being read.
+   ============================================================ */
+
+/* --- Reveal on enter. Driven by IntersectionObserver adding .is-in.
+       Transition (not keyframes) so a fast scroll retargets cleanly.
+
+       Scoped to html.js — the class is set by an inline script in <head>.
+       Without JS the hidden state never applies, so content is never
+       trapped behind an animation that will not run. --- */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  filter: blur(4px);
+  transition:
+    opacity   var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    filter    var(--dur) var(--ease);
+  transition-delay: calc(var(--stagger, 0) * 80ms);
+  /* No will-change: this is a one-off opacity/transform transition on a
+     handful of elements. Pinning compositing layers here would cost more
+     than it saves, and releasing them reliably needs transitionend, which
+     is not guaranteed to fire. Add it only if stutter actually shows up. */
+}
+html.js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+/* --- Pace bar: scroll position as a hairline. Scroll-driven, no JS.
+       Collapsed to zero width where the timeline isn't supported. --- */
+.pacebar {
+  position: fixed; inset-block-start: 0; inset-inline-start: 0;
+  height: 2px; width: 100%;
+  background: var(--hivis);
+  transform: scaleX(0); transform-origin: 0 50%;
+  z-index: 50; pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pacebar {
+      animation: pace linear both;
+      animation-timeline: scroll(root block);
+    }
+    @keyframes pace { to { transform: scaleX(1); } }
+  }
+}
+
+/* --- Hero wordmark drifts as it leaves. Scroll-driven, progressive. --- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .mark-drift {
+      animation: markDrift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+    /* transform only — opacity is owned by the reveal transition, and a
+       CSS animation on the same property would override it permanently. */
+    @keyframes markDrift {
+      to { transform: translateY(-12%); }
+    }
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Everything resolves to its final state instantly. Content is
+   never gated behind an animation that does not run.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.js [data-reveal] { opacity: 1; transform: none; filter: none; }
+  .pacebar { display: none; }
+}

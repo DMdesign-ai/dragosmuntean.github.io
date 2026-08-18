@@ -1,0 +1,89 @@
+---
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+import { getCollection } from 'astro:content';
+import LogRow from '../../../components/race/LogRow.astro';
+import { previewImage } from '../../../lib/preview';
+
+const projects = (await getCollection('projects'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
+---
+
+<RaceLayout title="Work — Dragos Muntean" ground="snow" doc="DOC RD-04 / WORK">
+
+  <section class="band on-snow head">
+    <span class="registry">04 / Work</span>
+    <h1>Work</h1>
+    <p class="lede">
+      Newest first. Current work at TWINT is under NDA and appears as a withheld entry —
+      the method behind it is written up in <a class="link" href="/v3/notes/">Notes</a>.
+      Below that, three projects at On, each with the outcome attached.
+    </p>
+  </section>
+
+  <section class="band on-snow tight">
+    <article class="entry">
+      <div class="entry-head">
+        <h2>TWINT</h2>
+        <span class="tag-nda">Under NDA</span>
+      </div>
+      <dl class="specbar">
+        <div><dt>Role</dt><dd>Product designer</dd></div>
+        <div><dt>Period</dt><dd>2025 —</dd></div>
+        <div><dt>Domain</dt><dd>Swiss payments</dd></div>
+        <div><dt>Surfaces</dt><dd class="is-withheld">Withheld</dd></div>
+        <div><dt>Outcome</dt><dd class="is-withheld">Withheld</dd></div>
+      </dl>
+      <p class="entry-note">
+        The work itself cannot be shown. Writing about method, using my own projects as the
+        worked examples, is in <a class="link" href="/v3/notes/">Notes</a>.
+      </p>
+    </article>
+  </section>
+
+  <section class="band on-snow tight">
+    <div class="rows">
+      {projects.map((p, i) => (
+        <LogRow
+          n={String(projects.length - i).padStart(3, '0')}
+          title={p.data.title}
+          meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
+          href={`/v3/work/${p.id}/`}
+          figure={p.data.figure ?? 'Case study'}
+          image={previewImage(p)}
+        />
+      ))}
+    </div>
+  </section>
+
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s8); }
+  .head { padding-bottom: var(--s8); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .head .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .head h1 { font-size: var(--t-h1); letter-spacing: var(--tr-h1); margin-bottom: var(--s6); }
+  .lede { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); }
+
+  .rows { border-bottom: 1px solid var(--rule); }
+
+  .entry { border: 1px solid var(--rule); padding: var(--s8); background: var(--raise); }
+  .entry-head { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s6); flex-wrap: wrap; }
+  .entry-head h2 { font-size: var(--t-h3); letter-spacing: -0.015em; }
+  .entry-note { font-size: var(--t-14); color: var(--fg-dim); margin-top: var(--s6); }
+</style>
+</RaceLayout>

@@ -1,0 +1,149 @@
+---
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '../styles/race.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Ground the page opens on. Night for hero/log, snow for reading. */
+  ground?: 'night' | 'snow';
+  /** Registry code shown at the top right, e.g. "DOC RD-04 / WORK". */
+  doc?: string;
+}
+
+const {
+  title,
+  description = 'Dragos Muntean — design technologist. Product design at TWINT, previously On.',
+  ground = 'night',
+  doc = 'DOC RD-00',
+} = Astro.props;
+
+const nav = [
+  { label: 'Work',  href: '/v3/work/'  },
+  { label: 'Labs',  href: '/v3/labs/'  },
+  { label: 'Notes', href: '/v3/notes/' },
+  { label: 'About', href: '/v3/about/' },
+];
+
+const path = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <script is:inline>document.documentElement.classList.add('js');</script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+</head>
+<body class={ground === 'night' ? 'on-night' : 'on-snow'}>
+
+  <div class="pacebar" aria-hidden="true"></div>
+
+  <header class={`dochead ${ground === 'night' ? 'on-night' : 'on-snow'}`}>
+    <div class="dochead__in">
+      <a class="dochead__mark hit" href="/v3/">DM</a>
+      <nav class="dochead__nav" aria-label="Primary">
+        {nav.map((n) => (
+          <a class="hit" href={n.href} aria-current={path.startsWith(n.href) ? 'page' : undefined}>{n.label}</a>
+        ))}
+      </nav>
+      <span class="registry dochead__doc">{doc}</span>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <script is:inline>
+    // Reveal-on-enter. One observer, unobserved after firing, so scrolling
+    // back up never replays — a re-run would be motion the reader didn't ask for.
+    (function () {
+      var els = document.querySelectorAll('[data-reveal]');
+      if (!els.length) return;
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) {
+        els.forEach(function (el) { el.classList.add('is-in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        });
+      }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+
+  <footer class="docfoot on-night">
+    <div class="docfoot__in">
+      <span class="registry">Dragos Muntean · Zurich CH</span>
+      <span class="registry">47.3769°N 8.5417°E</span>
+      <nav class="docfoot__links" aria-label="Elsewhere">
+        <a class="link hit" href="https://github.com/DMdesign-ai">GitHub</a>
+        <a class="link hit" href="https://www.linkedin.com/in/dragos-muntean/">LinkedIn</a>
+        <a class="link hit" href="/archive/">Archive</a>
+      </nav>
+    </div>
+  </footer>
+
+<style>
+  .dochead { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--rule);
+             backdrop-filter: blur(8px); }
+  .dochead__in {
+    max-width: 68rem; margin-inline: auto; padding: var(--s3) var(--s6);
+    display: flex; align-items: center; gap: var(--s6);
+  }
+  .dochead__mark {
+    font-family: var(--f-mono); font-size: var(--t-11); letter-spacing: 0.2em;
+    color: var(--fg); text-decoration: none; font-weight: 600;
+  }
+  .dochead__nav { display: flex; gap: 1.25rem; margin-right: auto; }
+  /* Widen the hit boxes to a full 44px without letting neighbours touch:
+     20px gap - 7px + 7px = 6px clear between adjacent targets. */
+  .dochead__nav .hit::after { inset: -14px -7px; }
+  .dochead__mark.hit::after { inset: -14px -13px; }
+  .dochead__nav a {
+    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    text-transform: uppercase; color: var(--fg-dim); text-decoration: none;
+    padding-bottom: 2px; border-bottom: 1px solid transparent;
+    transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  }
+  .dochead__nav a:hover { color: var(--fg); }
+  .dochead__nav a[aria-current='page'] { color: var(--fg); border-bottom-color: var(--hivis); }
+  .dochead__doc { white-space: nowrap; }
+  @media (max-width: 640px) {
+    /* Gaps stay wide enough that the 44px hit boxes never touch:
+       mark needs 13 + nav needs 7 = 20px, so the header gap holds at 24px. */
+    .dochead__in { padding-inline: var(--s4); gap: var(--s6); }
+    .dochead__doc { display: none; }
+    .dochead__nav { gap: 1.25rem; }
+  }
+
+  /* No margin: every page's last band already carries its own padding, and a
+     margin here shows the body ground through — which reads as a stray white
+     strip on any page that ends on a dark section. */
+  .docfoot { border-top: 1px solid var(--rule); }
+  .docfoot__in {
+    max-width: 68rem; margin-inline: auto; padding: var(--s8) var(--s6);
+    display: flex; flex-wrap: wrap; gap: var(--s3) var(--s8); align-items: baseline;
+  }
+  .docfoot__links { display: flex; gap: var(--s6); margin-left: auto; }
+  .docfoot__links a {
+    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+  @media (max-width: 640px) {
+    .docfoot__in { padding-inline: var(--s4); }
+    .docfoot__links { margin-left: 0; }
+  }
+</style>
+</body>
+</html>

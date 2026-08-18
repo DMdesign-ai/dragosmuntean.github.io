@@ -1,0 +1,329 @@
+---
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '../styles/race.css';
+
+const scale = [
+  { tok: '--t-mark', use: 'Wordmark. Bled off the edge. Once per page.',  px: 'clamp 56 → 224' },
+  { tok: '--t-h1',   use: 'Page statement.',                              px: 'clamp 40 → 80'  },
+  { tok: '--t-h2',   use: 'Section head.',                                px: 'clamp 28 → 44'  },
+  { tok: '--t-h3',   use: 'Sub-head.',                                    px: '22'             },
+  { tok: '--t-lead', use: 'Entry titles, standfirst.',                    px: '20'             },
+  { tok: '--t-body', use: 'Reading text. Newsreader.',                    px: '17'             },
+  { tok: '--t-14',   use: 'Spec values.',                                 px: '14'             },
+  { tok: '--t-10',   use: 'Registry codes, labels.',                      px: '10'             },
+];
+
+const log = [
+  { n: '014', t: 'Warranty Claims',  meta: 'On · UX Research · 2024',        fig: '2.3× faster' },
+  { n: '013', t: 'RIMWARD',          meta: 'Colony ARPG · one HTML file',    fig: '675 KB'      },
+  { n: '012', t: 'svg-normalize',    meta: 'Figma plugin + web tool',        fig: '43 commits'  },
+  { n: '011', t: 'Hybrid Explorer',  meta: 'On · In-store retail · 2024',    fig: '2 refs'      },
+  { n: '010', t: 'EduTube',          meta: 'Chrome extension · 2025',        fig: 'Shipped'     },
+];
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Race Document — design system</title>
+</head>
+<body class="on-night">
+
+  <!-- ═══ 00 SPECIMEN ═══════════════════════════════════════ -->
+  <section class="band on-night hero">
+    <div class="rail">
+      <span class="registry">DM · DRAGOSMUNTEAN.COM · V3</span>
+      <span class="registry">DOC RD-01 / SYSTEM</span>
+    </div>
+    <h1 class="wordmark bleed reveal">DRAGOS<br />MUNTEAN</h1>
+    <div class="hero-foot">
+      <p class="hero-line">Design technologist. Currently at TWINT.<br />Designing product since 2008, now building it too.</p>
+      <dl class="specbar specbar--wide">
+        <div><dt>Base</dt><dd>Zurich CH</dd></div>
+        <div><dt>Position</dt><dd>47.3769°N 8.5417°E</dd></div>
+        <div><dt>Entries</dt><dd>14</dd></div>
+        <div><dt>Since</dt><dd>2008</dd></div>
+        <div><dt>Status</dt><dd class="is-now">Building</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ═══ 01 GROUNDS ════════════════════════════════════════ -->
+  <section class="band on-night">
+    <header class="sechead">
+      <span class="registry">01 / Grounds</span>
+      <h2>Two grounds, one system</h2>
+      <p class="lede">Night carries the hero, the log and /now. Snow carries work, case studies and notes — your On screenshots are light UI and need a light ground to sit on. Components are written once against semantic tokens and flipped by a single class, so nothing is authored twice.</p>
+    </header>
+
+    <div class="grounds">
+      <div class="gcard on-night">
+        <span class="registry registry--strong">.on-night</span>
+        <p class="gnote">Hero · ship log · /now · archive</p>
+        <ul class="swatchlist">
+          <li><i style="background:#0E100F"></i><code>--night</code><em>#0E100F</em></li>
+          <li><i style="background:#171A18"></i><code>--night-raise</code><em>#171A18</em></li>
+          <li><i style="background:#232823"></i><code>--night-rule</code><em>#232823</em></li>
+          <li><i style="background:#E9EDE6"></i><code>--mist</code><em>#E9EDE6</em></li>
+          <li><i style="background:#8E968B"></i><code>--mist-dim</code><em>#8E968B</em></li>
+        </ul>
+      </div>
+      <div class="gcard on-snow">
+        <span class="registry registry--strong">.on-snow</span>
+        <p class="gnote">Work · case studies · notes</p>
+        <ul class="swatchlist">
+          <li><i style="background:#F4F5F1"></i><code>--snow</code><em>#F4F5F1</em></li>
+          <li><i style="background:#EAEBE5"></i><code>--snow-raise</code><em>#EAEBE5</em></li>
+          <li><i style="background:#D8DBD1"></i><code>--snow-rule</code><em>#D8DBD1</em></li>
+          <li><i style="background:#12150F"></i><code>--ink</code><em>#12150F</em></li>
+          <li><i style="background:#5E645A"></i><code>--ink-dim</code><em>#5E645A</em></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 02 ACCENT ═════════════════════════════════════════ -->
+  <section class="band on-snow">
+    <header class="sechead">
+      <span class="registry">02 / Accent</span>
+      <h2>One colour, spent once</h2>
+      <p class="lede">Hi-vis lime — the reflective-vest colour, borrowed from a 6am run rather than from a neon sign. Kaltgrat spends it on exactly one value per screen: <code class="inl">START 11:30</code>. That discipline is what keeps the page calm, and it is the single easiest rule to break.</p>
+    </header>
+
+    <div class="rules">
+      <div class="rule-ok">
+        <span class="registry registry--strong">Do</span>
+        <p>Mark the one live value. Everything else is ink or mist.</p>
+        <div class="demo on-night">
+          <dl class="specbar">
+            <div><dt>Course</dt><dd>2 050 m</dd></div>
+            <div><dt>Vertical</dt><dd>860 m</dd></div>
+            <div><dt>Start</dt><dd class="is-now">11:30</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="rule-no">
+        <span class="registry registry--strong">Don't</span>
+        <p>Lime as body text on snow. It fails contrast — which is why <code class="inl">--accent-text</code> resolves to ink on the light ground, and lime becomes a fill instead.</p>
+        <div class="demo on-snow">
+          <p class="badcolor">This line is lime on snow. It is close to unreadable, and no amount of weight fixes it.</p>
+          <p class="goodcolor">Ink on snow, with a <span class="marker-now">fill</span> where the accent is needed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 03 FACES ══════════════════════════════════════════ -->
+  <section class="band on-night">
+    <header class="sechead">
+      <span class="registry">03 / Faces</span>
+      <h2>Three faces, three jobs</h2>
+      <p class="lede">Display and text follow komoot's 2025 redesign, both self-hosted — no CDN, no third-party request. The mono is ours: komoot has no mono, and the registry layer needs one.</p>
+    </header>
+
+    <div class="faces">
+      <div class="face">
+        <span class="registry registry--strong">Nohemi — display</span>
+        <p class="fspec">Wordmarks, statements, entry titles. komoot's display face in the 2025 app redesign — geometric, slightly condensed, built to be set large. Self-hosted from the author's own woff2 builds.</p>
+        <p class="fsample fsample--display">Down is the other half</p>
+      </div>
+      <div class="face">
+        <span class="registry registry--strong">Satoshi — text</span>
+        <p class="fspec">Case studies, notes, everything read at length. komoot's UI face, from Indian Type Foundry. Self-hosted as their variable woff2 — one 42 KB file covers weights 300 to 900. Warmer and rounder than a strict grotesk, which keeps long reading from feeling clinical.</p>
+        <p class="fsample fsample--read">A help centre is only as good as its information architecture.</p>
+      </div>
+      <div class="face">
+        <span class="registry registry--strong">IBM Plex Mono — registry</span>
+        <p class="fspec">Every label, code, date and figure. Drawn for technical documents, which is exactly the authority this system borrows.</p>
+        <p class="fsample fsample--mono">FIS WC / DH / KGT / DOC 84-01</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 04 SCALE ══════════════════════════════════════════ -->
+  <section class="band on-snow">
+    <header class="sechead">
+      <span class="registry">04 / Scale</span>
+      <h2>Extreme contrast, deliberate gap</h2>
+      <p class="lede">A race document is enormous type and tiny type with very little between. That gap is the look. Filling it with comfortable mid-sizes is how this drifts back into a generic minimal portfolio.</p>
+    </header>
+    <div class="scroller">
+      <table class="scale">
+        <thead><tr><th>Token</th><th>px</th><th>Use</th></tr></thead>
+        <tbody>
+          {scale.map((r) => (
+            <tr><td><code class="inl">{r.tok}</code></td><td class="num">{r.px}</td><td>{r.use}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══ 05 LOG ════════════════════════════════════════════ -->
+  <section class="band on-night">
+    <header class="sechead">
+      <span class="registry">05 / Ship log</span>
+      <h2>The spine of the site</h2>
+      <p class="lede">Every project is a dated entry with one real figure. Hand-kept in MDX — no API, no token, no empty state. It opens full because the work is already done.</p>
+    </header>
+    <div class="logwrap">
+      {log.map((e) => (
+        <a class="logrow" href="#">
+          <span class="logrow__n">{e.n}</span>
+          <span>
+            <span class="logrow__t">{e.t}</span>
+            <span class="logrow__meta">{e.meta}</span>
+          </span>
+          <span class="logrow__fig">{e.fig}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- ═══ 06 WITHHELD ═══════════════════════════════════════ -->
+  <section class="band on-snow">
+    <header class="sechead">
+      <span class="registry">06 / Withheld entry</span>
+      <h2>How TWINT appears</h2>
+      <p class="lede">The same spec-sheet form as any other entry, with the unpublishable fields left visibly empty. In a document grammar a form with blanks reads as authentic — it is how real technical records look. Plain wording, no redaction bars, no theatre.</p>
+    </header>
+
+    <article class="entry">
+      <div class="entry-head">
+        <h3>TWINT</h3>
+        <span class="tag-nda">Under NDA</span>
+      </div>
+      <dl class="specbar">
+        <div><dt>Role</dt><dd>Product designer</dd></div>
+        <div><dt>Period</dt><dd>2025 —</dd></div>
+        <div><dt>Domain</dt><dd>Swiss payments</dd></div>
+        <div><dt>Surfaces</dt><dd class="is-withheld">Withheld</dd></div>
+        <div><dt>Outcome</dt><dd class="is-withheld">Withheld</dd></div>
+      </dl>
+      <p class="entry-note">The work itself cannot be shown. Writing about method, using my own projects as the worked examples, is in <a class="link" href="#">Notes</a>.</p>
+    </article>
+
+    <p class="aside">What this communicates: currently employed, senior seat, Swiss fintech, and disciplined about confidentiality. The last one is a hiring signal rather than a gap.</p>
+  </section>
+
+  <!-- ═══ 07 MOTION ═════════════════════════════════════════ -->
+  <section class="band on-night">
+    <header class="sechead">
+      <span class="registry">07 / Motion</span>
+      <h2>One curve, two durations</h2>
+      <p class="lede">Entry reveal on load. Hover feedback. Nothing else — no parallax, no scroll-jacking, nothing that moves while it is being read. Motion is where "chill" is most often lost.</p>
+    </header>
+    <dl class="specbar motion">
+      <div><dt>Easing</dt><dd>cubic-bezier(.16, 1, .3, 1)</dd></div>
+      <div><dt>Hover</dt><dd>150 ms</dd></div>
+      <div><dt>Reveal</dt><dd>420 ms · 8px rise</dd></div>
+      <div><dt>Reduced</dt><dd>Fully honoured</dd></div>
+    </dl>
+  </section>
+
+  <footer class="band on-night foot">
+    <span class="registry">Race Document — system rev 01</span>
+    <span class="registry">Phase 1 of 5</span>
+    <span class="registry">Next: home + work</span>
+  </footer>
+
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+
+  /* --- hero --- */
+  .hero { padding-top: var(--s8); overflow: hidden; }
+  .rail {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s2);
+    border-bottom: 1px solid var(--rule); padding-bottom: var(--s3); margin-bottom: var(--s16);
+  }
+  .bleed { max-width: none; margin-left: -0.06em; }
+  .hero-foot {
+    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
+    gap: var(--s12); align-items: end; margin-top: var(--s12);
+  }
+  @media (max-width: 820px) { .hero-foot { grid-template-columns: 1fr; gap: var(--s8); } }
+  .hero-line { font-size: var(--t-lead); line-height: 1.45; color: var(--fg-dim); }
+
+  /* --- section heads --- */
+  .sechead { margin-bottom: var(--s12); }
+  .sechead .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .sechead h2 { font-size: var(--t-h2); letter-spacing: var(--tr-h2); margin-bottom: var(--s4); }
+  .lede { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); }
+  .inl {
+    font-family: var(--f-mono); font-size: 0.86em; letter-spacing: 0.02em;
+    background: var(--raise); padding: 0.1em 0.35em; color: var(--fg);
+  }
+
+  /* --- grounds --- */
+  .grounds { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); }
+  @media (max-width: 720px) { .grounds { grid-template-columns: 1fr; } }
+  .gcard { padding: var(--s6); border: 1px solid var(--rule); }
+  .gnote { font-size: var(--t-14); color: var(--fg-dim); margin: var(--s3) 0 var(--s6); }
+  .swatchlist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s2); }
+  .swatchlist li { display: grid; grid-template-columns: 1.5rem 1fr auto; gap: var(--s3); align-items: center; }
+  .swatchlist i { width: 1.5rem; height: 1.5rem; border: 1px solid var(--rule); display: block; }
+  .swatchlist code, .swatchlist em {
+    font-family: var(--f-mono); font-size: var(--t-11); font-style: normal; letter-spacing: 0.02em;
+  }
+  .swatchlist code { color: var(--fg); }
+  .swatchlist em { color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+
+  /* --- accent rules --- */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); }
+  @media (max-width: 720px) { .rules { grid-template-columns: 1fr; } }
+  .rule-ok, .rule-no { border-top: 2px solid var(--fg); padding-top: var(--s4); }
+  .rule-no { border-top-color: var(--fg-faint); }
+  .rule-ok > p, .rule-no > p { font-size: var(--t-14); color: var(--fg-dim); margin: var(--s3) 0 var(--s6); }
+  .rule-ok .registry, .rule-no .registry { display: block; margin-bottom: var(--s2); }
+  .demo { padding: var(--s6); border: 1px solid var(--rule); }
+  .badcolor { color: #D8F04A; font-size: var(--t-14); }
+  .goodcolor { color: var(--ink); font-size: var(--t-14); margin-top: var(--s4); }
+
+  /* --- faces --- */
+  .faces { display: grid; gap: var(--s12); }
+  .face { border-top: 1px solid var(--rule); padding-top: var(--s4); }
+  .face .registry { display: block; margin-bottom: var(--s3); color: var(--fg-dim); }
+  .fspec { font-size: var(--t-14); color: var(--fg-dim); max-width: 52ch; }
+  .fsample { margin-top: var(--s6); max-width: none; }
+  .fsample--display { font-family: var(--f-display); font-weight: 700; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: var(--tr-h1); line-height: 1; }
+  .fsample--read { font-family: var(--f-read); font-size: clamp(1.25rem, 3vw, 2rem); line-height: 1.35; }
+  .fsample--mono { font-family: var(--f-mono); font-size: clamp(1rem, 2.4vw, 1.6rem); letter-spacing: 0.06em; }
+
+  /* --- scale table --- */
+  .scroller { overflow-x: auto; }
+  .scale { border-collapse: collapse; width: 100%; min-width: 34rem; }
+  .scale th {
+    text-align: left; font-family: var(--f-mono); font-weight: 400; font-size: var(--t-10);
+    letter-spacing: var(--tr-mono); text-transform: uppercase; color: var(--fg-faint);
+    border-bottom: 1px solid var(--fg); padding: 0 var(--s6) var(--s2) 0;
+  }
+  .scale td {
+    padding: var(--s3) var(--s6) var(--s3) 0; border-bottom: 1px solid var(--rule);
+    font-size: var(--t-14); color: var(--fg-dim); vertical-align: baseline;
+  }
+  .scale td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: var(--t-11); white-space: nowrap; }
+
+  /* --- log --- */
+  .logwrap { border-bottom: 1px solid var(--rule); }
+
+  /* --- withheld entry --- */
+  .entry { border: 1px solid var(--rule); padding: var(--s8); background: var(--raise); }
+  .entry-head { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s6); flex-wrap: wrap; }
+  .entry-head h3 { font-size: var(--t-h3); letter-spacing: -0.015em; }
+  .entry-note { font-size: var(--t-14); color: var(--fg-dim); margin-top: var(--s6); }
+  .aside { font-size: var(--t-14); color: var(--fg-dim); margin-top: var(--s6); font-style: italic; }
+
+  .motion dd { font-size: var(--t-12); }
+
+  .foot { padding-block: var(--s8); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s8);
+          border-top: 1px solid var(--rule); }
+  .foot > * { max-width: none; }
+</style>
+</body>
+</html>

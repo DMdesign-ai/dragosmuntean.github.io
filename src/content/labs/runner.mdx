@@ -1,0 +1,30 @@
+---
+title: "Runner"
+description: "A side-scrolling canvas game with a hand-written engine. It used to be the entire homepage."
+date: 2026-03-01
+tags: ["Canvas", "TypeScript", "Game engine"]
+figure: "1 685 lines"
+stack: ["TypeScript", "Canvas 2D", "Astro", "React"]
+image: "/images/labs/runner.webp"
+status: "Playable"
+---
+
+## What it is
+
+A side-scroller with two modes. **Road Runner** puts you in city traffic dodging cars, cones and manholes. **Trail Runner** moves it outdoors, where the obstacles are bears, logs and bushes.
+
+## What is actually in it
+
+No game framework. The engine is 1 685 lines of TypeScript split the way an engine usually is:
+
+- `loop.ts` — 539 lines, the game loop and state machine
+- `renderer.ts` — 447 lines, all drawing
+- `sprites.ts` — 368 lines, sprite definitions
+- `input.ts` — 154 lines, keyboard and touch
+- `entities.ts` — 145 lines, the player and obstacles
+
+The touch handling exists because the game had to work on a phone, which is a harder problem than the desktop version: swipe gestures, tap-to-select on the character screen, and scrolling the canvas into view when play starts.
+
+## Why it is here and not on the front page
+
+It was the homepage of the previous version of this site. As navigation it was a toll booth: you had to play a game to read a case study. As an exhibit it is evidence of range, so it moved here and the front door became a door.

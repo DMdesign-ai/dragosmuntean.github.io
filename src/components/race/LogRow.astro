@@ -1,0 +1,53 @@
+---
+/**
+ * One row of a log: number, title, meta line, figure on the right.
+ *
+ * If `image` is given the row becomes a hover target: it opens and shows a
+ * thumbnail of the entry's first image. Rows without one never get the class,
+ * so they simply don't open rather than expanding onto nothing.
+ *
+ * Without `href` the row renders as a div — used for the withheld TWINT entry,
+ * which is a real entry with nowhere to go.
+ */
+interface Props {
+  n: string;
+  title: string;
+  meta: string;
+  href?: string;
+  figure?: string;
+  /** Shown instead of `figure`, styled as a tag. For "Under NDA". */
+  tag?: string;
+  image?: string | null;
+  /** Index used for the staggered reveal on the homepage. */
+  stagger?: number;
+  reveal?: boolean;
+}
+
+const { n, title, meta, href, figure, tag, image, stagger, reveal = false } = Astro.props;
+
+const Tag = href ? 'a' : 'div';
+const classes = ['logrow', !href && 'logrow--static', image && 'logrow--peek']
+  .filter(Boolean)
+  .join(' ');
+---
+
+<Tag
+  class={classes}
+  href={href}
+  data-reveal={reveal ? '' : undefined}
+  style={stagger !== undefined ? `--stagger:${stagger}` : undefined}
+>
+  <span class="logrow__n">{n}</span>
+  <span>
+    <span class="logrow__t">{title}</span>
+    <span class="logrow__meta">{meta}</span>
+  </span>
+  {tag
+    ? <span class="tag-nda">{tag}</span>
+    : <span class="logrow__fig">{figure}</span>}
+  {image && (
+    <span class="logrow__peek" aria-hidden="true">
+      <span><img src={image} alt="" loading="lazy" decoding="async" /></span>
+    </span>
+  )}
+</Tag>

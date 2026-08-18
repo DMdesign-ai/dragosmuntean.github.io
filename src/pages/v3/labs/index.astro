@@ -1,0 +1,69 @@
+---
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+import { getCollection } from 'astro:content';
+import LogRow from '../../../components/race/LogRow.astro';
+import { previewImage } from '../../../lib/preview';
+
+const labs = (await getCollection('labs'))
+  .filter((l) => !l.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
+---
+
+<RaceLayout
+  title="Labs — Dragos Muntean"
+  description="Things built outside work: plugins, extensions, games and experiments."
+  ground="snow"
+  doc="DOC RD-06 / LABS"
+>
+
+  <section class="band on-snow head">
+    <span class="registry">06 / Labs</span>
+    <h1>Things I build to find out</h1>
+    <p class="lede">
+      Almost none of this shipped, and none of it was meant to. These are built for
+      the fun of it, or to help someone out, or to answer one question about a tool.
+      Most are parked partway: far enough to learn what I wanted, close enough to
+      pick up again when the models get good enough to finish them.
+    </p>
+  </section>
+
+  <section class="band on-snow tight">
+    <div class="rows">
+      {labs.map((l, i) => (
+        <LogRow
+          n={String(labs.length - i).padStart(3, '0')}
+          title={l.data.title}
+          meta={`${l.data.stack.slice(0, 3).join(' · ')} · ${fmt(l.data.date)}`}
+          href={`/v3/labs/${l.id}/`}
+          figure={l.data.figure ?? l.data.status}
+          image={previewImage(l)}
+        />
+      ))}
+    </div>
+  </section>
+
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s8); }
+  .head { padding-bottom: var(--s8); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .head .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .head h1 { font-size: var(--t-h1); letter-spacing: var(--tr-h1); margin-bottom: var(--s6); }
+  .lede { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); }
+  .rows { border-bottom: 1px solid var(--rule); }
+</style>
+</RaceLayout>

@@ -1,42 +1,50 @@
 ---
 title: "Warranty Claims Process Optimization"
-description: "Streamlined the warranty claim user experience and automated data validation to dramatically reduce processing time and improve customer retention."
+description: "Claims were slow because they arrived incomplete. Validating the data at entry cut the back-and-forth, and the processing time with it."
 date: 2024-06-01
 tags: ["UX Research", "Prototyping", "UI Design"]
-image: "/images/projects/warranty-claims-hero.svg"
-images:
-  - "/images/projects/warranty-claims-desktop.png"
-  - "/images/projects/warranty-claims-mobile.png"
 category: "work"
 company: "On"
+figure: "2.3× faster"
 role: "UX Designer"
 impact:
-  - "230% reduction in claim processing time"
-  - "440% decrease in case-to-order ratio"
-  - "Boosted customer retention through improved experience"
+  - "Claim processing 2.3× faster"
+  - "Case-to-order ratio cut by 4.4×"
+  - "Higher customer retention"
 ---
 
-## Overview
+## The problem
 
-The warranty claims process was a major friction point for both customers and internal support teams. Claims took too long to process, required excessive manual validation, and led to high case-to-order ratios that strained resources.
+A warranty claim is a customer telling you that something you sold them broke. On's process made that a slow conversation. Claims waited on manual validation, support answered the same corrections over and over, and the case-to-order ratio climbed high enough to strain the team.
 
-## Approach
+## Where the time actually went
 
-Focused on streamlining the warranty claim user experience while introducing automated data validation to reduce manual steps. The approach combined UX research to identify pain points with rapid prototyping to test solutions with real users.
+I mapped the existing journey end to end, looking for where claims stalled and where people abandoned them.
 
-Key activities included:
-- **User Research** — Mapped the existing claims journey, identifying bottlenecks and drop-off points
-- **Data Validation Automation** — Designed flows that auto-validate claim data, reducing back-and-forth with customers
-- **Prototyping & Testing** — Built interactive prototypes and iterated based on user feedback
+Most of the delay wasn't the decision. It was the round trips. A claim would arrive missing something, support would write back asking for it, and the clock started again. The customer found out their claim was incomplete two days after they'd stopped thinking about it.
 
-## Impact
+## The fix
 
-The redesigned process delivered measurable improvements across the board:
+Move the checking upstream. I designed flows that validate claim data as it's entered, so what reaches support is already complete. The customer learns what's missing while they're still looking at the form.
 
-- **230% reduction** in claim processing time
-- **440% decrease** in case-to-order ratio
-- **Boosted customer retention** through a smoother, faster claims experience
+That removes work in both directions: fewer messages for support to send, fewer for the customer to answer.
 
-## Key Takeaway
+Prototypes went in front of real users, and the flow changed several times based on what they did with it.
 
-Sometimes the biggest UX wins come from removing steps rather than adding features. By automating validation and simplifying the claim flow, we freed up support teams and made customers happier simultaneously.
+<figure>
+  <img src="/images/projects/warranty-claims-mobile.webp" alt="The full mobile warranty claim flow: eleven screens connected by arrows, running from the product page through sign-in and account creation, into the claim steps, including the error state shown when a purchase cannot be matched to an On order." />
+  <figcaption>The whole mobile flow, including the paths that fail. The screen on the right is the one that mattered most: what a customer sees when we cannot match their purchase.</figcaption>
+</figure>
+
+<figure>
+  <img src="/images/projects/warranty-claims-desktop.webp" alt="Two desktop states of the warranty claim form, showing the stepped contact and order sections beside a persistent claim summary, and the product picker separating items still under warranty from those that are not." />
+  <figcaption>On desktop the claim summary stays visible while you work. The product picker separates what is still covered from what is not, so nobody completes a claim that was never going to be accepted.</figcaption>
+</figure>
+
+## What changed
+
+Processing became 2.3× faster, cutting the time on a claim to under half. The case-to-order ratio fell by 4.4×. Retention improved, because a claim resolved quickly is a customer who stays.
+
+## What I took from it
+
+The win came from removing steps, not adding features. Every field that validates itself is a support conversation that never has to happen.
