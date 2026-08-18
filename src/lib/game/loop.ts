@@ -213,9 +213,6 @@ function update(
     if (input.confirm) {
       state.selectedMode = state.selectIndex === 0 ? 'road' : 'trail';
       state.phase = 'playing';
-  // Wait for first input to start the game
-  if (!state.started) {
-    if (input.left || input.right || input.up || input.down) {
       state.started = true;
       // Clear keys to prevent immediate movement
       input.keys['Enter'] = false;
@@ -244,8 +241,6 @@ function update(
       const stars = state.stars;
       Object.assign(state, initGameState(width, height, projects, hs));
       state.stars = stars;
-      state.stars = stars; // reuse stars
-      state.started = true;
     }
     return;
   }
@@ -319,7 +314,6 @@ function update(
   }
 
   // --- Spawn doors ---
-  // --- Spawn doors (every ~150m) ---
   state.doorSpawnTimer++;
   if (
     state.doorSpawnTimer >= GAME.doorSpawnInterval &&
@@ -329,25 +323,18 @@ function update(
     const next = state.doorProjectQueue.shift()!;
     state.doors.push(createDoor(width, next.slug, next.name));
 
-    // Refill queue when empty so doors keep cycling
     if (state.doorProjectQueue.length === 0) {
       state.doorProjectQueue = [...projects];
     }
   }
 
-  // --- Move obstacles downward ---
+  // --- Move entities downward ---
   for (const obs of state.obstacles) {
     obs.y += state.scrollSpeed * obs.speed;
   }
   for (const coin of state.coins) {
     coin.y += state.scrollSpeed * coin.speed;
   }
-  for (const door of state.doors) {
-    door.y += state.scrollSpeed * door.speed;
-    door.glowPhase += 0.05;
-  }
-
-  // --- Move doors downward ---
   for (const door of state.doors) {
     door.y += state.scrollSpeed * door.speed;
     door.glowPhase += 0.05;
@@ -405,11 +392,10 @@ function update(
     }
   }
 
-  // --- Door collision (player enters portal — NOT lethal) ---
+  // --- Door collision ---
   if (p.alive) {
     for (const door of state.doors) {
       if (door.entered) continue;
-      // Player center must be inside door bounds (generous detection)
       const pcx = p.x + p.width / 2;
       const pcy = p.y + p.height / 2;
       if (
@@ -421,6 +407,8 @@ function update(
         door.entered = true;
         state.navigating = true;
         state.navigateStartFrame = state.frameCount;
+        // Persist game state so the game resumes when the user returns
+        saveGameState(state);
         callbacks.onDoorEnter(door.projectSlug);
       }
     }
@@ -456,16 +444,7 @@ function render(
     drawDoor(ctx, door, state.frameCount);
   }
 
-  // Draw doors
-  for (const door of state.doors) {
-    drawDoor(ctx, door, state.frameCount);
-  }
-
-  // Draw player
-  drawPlayer(ctx, state.player);
-
-  // Draw HUD
-  drawScoreHUD(ctx, width, state.score, state.scrollSpeed);
+  drawPlayer(ctx, state.player, mode);
 
   // Trail runner sings running-themed phrases
   if (mode === 'trail' && state.player.alive && !state.gameOver) {
@@ -478,7 +457,6 @@ function render(
     drawGameOver(ctx, width, height, state.score, state.highScore);
   }
 
-  // Door transition overlay (expanding cyan circle)
   if (state.navigating) {
     const elapsed = state.frameCount - state.navigateStartFrame;
     const progress = Math.min(elapsed / GAME.doorTransitionFrames, 1);
@@ -493,8 +471,22 @@ export function createGameLoop(
   input: InputHandler,
   projects: DoorProjectData[] = [],
   callbacks: GameCallbacks = { onDoorEnter: () => {} },
-): () => void {
-  const state = initGameState(width, height, projects);
+): GameHandle {
+  // Check for saved state (returning from a project page)
+  const saved = loadGameState();
+  const state = initGameState(width, height, projects, saved?.highScore ?? 0);
+
+  if (saved) {
+    // Resume directly into playing phase with the same mode
+    state.phase = 'playing';
+    state.selectedMode = saved.mode;
+    state.selectIndex = saved.mode === 'trail' ? 1 : 0;
+    state.started = true;
+    state.scrollSpeed = Math.min(saved.scrollSpeed, PHYSICS.maxScrollSpeed);
+    state.frameCount = saved.frameCount;
+    state.score = saved.score;
+  }
+
   let animId: number;
   let running = true;
 
@@ -508,13 +500,24 @@ export function createGameLoop(
 
   function tick(timestamp: number) {
     if (!running) return;
-    update(state, input, width, height, projects, callbacks);
-    // Keep rendering during navigation for the transition animation
-    render(ctx, state, width, height);
-    // Increment frame count during navigation for transition progress
-    if (state.navigating) {
-      state.frameCount++;
+
+    if (lastTime === 0) lastTime = timestamp;
+    const delta = timestamp - lastTime;
+    lastTime = timestamp;
+
+    // Cap accumulated time to prevent spiral of death after tab-switch
+    accumulator += Math.min(delta, 200);
+
+    // Run fixed-step updates for each ~16.67ms that has elapsed
+    while (accumulator >= FRAME_DURATION) {
+      update(state, input, width, height, projects, callbacks);
+      if (state.navigating) {
+        state.frameCount++;
+      }
+      accumulator -= FRAME_DURATION;
     }
+
+    render(ctx, state, width, height);
     animId = requestAnimationFrame(tick);
   }
 

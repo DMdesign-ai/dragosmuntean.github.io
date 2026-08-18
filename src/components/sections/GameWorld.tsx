@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { createGameLoop } from '../../lib/game/loop';
-import type { DoorProjectData } from '../../lib/game/loop';
+import type { DoorProjectData, GameHandle } from '../../lib/game/loop';
 import { InputHandler } from '../../lib/game/input';
 
 // Project data for door portals (inlined because client:only can't import server modules)
@@ -12,8 +12,6 @@ const DOOR_PROJECTS: DoorProjectData[] = [
 
 // Base path (root since using custom domain)
 const BASE_PATH = '';
-// Base path from Astro config
-const BASE_PATH = '/dragosmuntean.github.io';
 
 export default function GameWorld() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,13 +27,6 @@ export default function GameWorld() {
   const handleGameStart = useCallback(() => {
     // On mobile, scroll the game canvas into view when play begins
     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
-  const handleDoorEnter = useCallback((projectSlug: string) => {
-    // Delay navigation to let the transition animation play
-    setTimeout(() => {
-      window.location.href = `${BASE_PATH}/projects/${projectSlug}`;
-    }, 800);
   }, []);
 
   useEffect(() => {
@@ -56,8 +47,6 @@ export default function GameWorld() {
       gameHandleRef.current = createGameLoop(ctx, width, height, input, DOOR_PROJECTS, {
         onDoorEnter: handleDoorEnter,
         onGameStart: handleGameStart,
-      gameCleanup = createGameLoop(ctx, width, height, input, DOOR_PROJECTS, {
-        onDoorEnter: handleDoorEnter,
       });
     };
 
@@ -78,7 +67,6 @@ export default function GameWorld() {
       input.destroy();
     };
   }, [handleDoorEnter, handleGameStart]);
-  }, [handleDoorEnter]);
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
@@ -87,7 +75,6 @@ export default function GameWorld() {
         style={{ display: 'block', width: '100%', height: '100%' }}
         tabIndex={0}
         aria-label="Vertical runner game — select a mode, dodge obstacles, and enter portals to view projects"
-        aria-label="Vertical runner game — dodge obstacles and enter portals to view projects"
       />
     </div>
   );
