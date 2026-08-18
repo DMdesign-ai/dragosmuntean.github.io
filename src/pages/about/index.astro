@@ -1,7 +1,7 @@
 ---
-import RaceLayout from '../../../layouts/RaceLayout.astro';
+import RaceLayout from '../../layouts/RaceLayout.astro';
 import { getCollection } from 'astro:content';
-import { roles, initials, DESIGN_SINCE } from '../../../lib/experience';
+import { roles, initials, DESIGN_SINCE } from '../../lib/experience';
 
 const projects = (await getCollection('projects')).filter((p) => !p.data.draft);
 const labs = (await getCollection('labs')).filter((l) => !l.data.draft);

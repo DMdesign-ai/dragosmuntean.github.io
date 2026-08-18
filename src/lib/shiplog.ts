@@ -27,52 +27,52 @@ export const shiplog: LogEntry[] = [
   {
     n: 14, title: 'svg-normalize', meta: 'Figma plugin + web tool',
     figure: '43 commits', date: '2026-03-01', kind: 'lab',
-    href: '/v3/labs/svg-normalize/',
+    href: '/labs/svg-normalize/',
   },
   {
     n: 13, title: 'Runner portfolio', meta: 'Canvas game · Astro',
     figure: '1 685 lines', date: '2026-03-01', kind: 'lab',
-    href: '/v3/labs/runner/',
+    href: '/labs/runner/',
   },
   {
     n: 12, title: 'Agent 2 UI', meta: 'Note · A2UI, Disco',
     figure: 'Published', date: '2026-01-01', kind: 'note',
-    href: '/v3/notes/agent-2-ui/',
+    href: '/notes/agent-2-ui/',
   },
   {
     n: 11, title: 'RIMWARD', meta: 'Colony ARPG · one HTML file',
     figure: '675 KB', date: '2025-09-01', kind: 'lab',
-    href: '/v3/labs/rimward/',
+    href: '/labs/rimward/',
   },
   {
     n: 10, title: 'Calisthenics program', meta: 'Figma Make · design systems',
     figure: 'Parked', date: '2025-08-01', kind: 'lab',
-    href: '/v3/labs/calisthenics/',
+    href: '/labs/calisthenics/',
   },
   {
     n: 9, title: 'Corippo Village Stays', meta: 'Booking site · AI-built',
     figure: 'Parked', date: '2025-05-01', kind: 'lab',
-    href: '/v3/labs/corippo/',
+    href: '/labs/corippo/',
   },
   {
     n: 8, title: 'EduTube', meta: 'Chrome extension',
     figure: 'Blocked on API', date: '2025-05-01', kind: 'lab',
-    href: '/v3/labs/edutube/',
+    href: '/labs/edutube/',
   },
   {
     n: 7, title: 'Warranty Claims', meta: 'On · UX research',
     figure: '2.3× faster', date: '2024-06-01', kind: 'work',
-    href: '/v3/work/warranty-claims-process-optimization/',
+    href: '/work/warranty-claims-process-optimization/',
   },
   {
     n: 6, title: 'Hybrid Explorer', meta: 'On · in-store retail',
     figure: 'In stores', date: '2024-03-01', kind: 'work',
-    href: '/v3/work/hybrid-explorer/',
+    href: '/work/hybrid-explorer/',
   },
   {
     n: 5, title: 'Help Center', meta: 'On · information architecture',
     figure: 'Mobile-first', date: '2024-01-01', kind: 'work',
-    href: '/v3/work/help-center-improvements/',
+    href: '/work/help-center-improvements/',
   },
 ];
 

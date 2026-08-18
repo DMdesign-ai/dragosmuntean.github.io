@@ -20,10 +20,10 @@ const {
 } = Astro.props;
 
 const nav = [
-  { label: 'Work',  href: '/v3/work/'  },
-  { label: 'Labs',  href: '/v3/labs/'  },
-  { label: 'Notes', href: '/v3/notes/' },
-  { label: 'About', href: '/v3/about/' },
+  { label: 'Work',  href: '/work/'  },
+  { label: 'Labs',  href: '/labs/'  },
+  { label: 'Notes', href: '/notes/' },
+  { label: 'About', href: '/about/' },
 ];
 
 const path = Astro.url.pathname;
@@ -34,7 +34,6 @@ const path = Astro.url.pathname;
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
   <title>{title}</title>
   <meta name="description" content={description} />
   <script is:inline>document.documentElement.classList.add('js');</script>
@@ -46,7 +45,7 @@ const path = Astro.url.pathname;
 
   <header class={`dochead ${ground === 'night' ? 'on-night' : 'on-snow'}`}>
     <div class="dochead__in">
-      <a class="dochead__mark hit" href="/v3/">DM</a>
+      <a class="dochead__mark hit" href="/">DM</a>
       <nav class="dochead__nav" aria-label="Primary">
         {nav.map((n) => (
           <a class="hit" href={n.href} aria-current={path.startsWith(n.href) ? 'page' : undefined}>{n.label}</a>

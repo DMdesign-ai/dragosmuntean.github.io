@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
-import RaceLayout from '../../../layouts/RaceLayout.astro';
-import ResponsiveGameMount from '../../../components/sections/ResponsiveGameMount.tsx';
+import RaceLayout from '../../layouts/RaceLayout.astro';
+import ResponsiveGameMount from '../../components/sections/ResponsiveGameMount.tsx';
 
 export async function getStaticPaths() {
   const labs = await getCollection('labs');
@@ -29,7 +29,7 @@ const playable = entry.id === 'runner';
 >
 
   <section class="band labhero on-night">
-    <a class="back registry hit" href="/v3/labs/">← Labs</a>
+    <a class="back registry hit" href="/labs/">← Labs</a>
     <h1 class="labtitle">{d.title}</h1>
     <p class="labdesc">{d.description}</p>
     <dl class="specbar specbar--wide">
@@ -76,10 +76,10 @@ const playable = entry.id === 'runner';
   <section class="band on-snow tight foot">
     {related && (
       <p class="related">
-        Written up in <a class="link" href={`/v3/notes/${related.id}/`}>{related.data.title}</a>.
+        Written up in <a class="link" href={`/notes/${related.id}/`}>{related.data.title}</a>.
       </p>
     )}
-    <a class="backlink link hit" href="/v3/labs/">← All labs</a>
+    <a class="backlink link hit" href="/labs/">← All labs</a>
   </section>
 
 <style>

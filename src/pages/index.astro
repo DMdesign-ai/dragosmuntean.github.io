@@ -1,100 +1,161 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import TopHUD from '../components/sections/TopHUD.astro';
-import BottomStatusBar from '../components/sections/BottomStatusBar.astro';
-import LeftPanel from '../components/sections/LeftPanel.astro';
-import RightPanel from '../components/sections/RightPanel.astro';
-import HeroBlock from '../components/sections/HeroBlock.astro';
-import ProjectsSection from '../components/sections/ProjectsSection.astro';
-import BlogSection from '../components/sections/BlogSection.astro';
-import AIBossSection from '../components/sections/AIBossSection.astro';
-import RunnerStats from '../components/sections/RunnerStats.astro';
-import ResponsiveGameMount from '../components/sections/ResponsiveGameMount';
+import RaceLayout from '../layouts/RaceLayout.astro';
+import HeroPhoto from '../components/race/HeroPhoto.astro';
+import { getCollection } from 'astro:content';
+import { shiplog, byDateDesc } from '../lib/shiplog';
+import { previewImage } from '../lib/preview';
+import LogRow from '../components/race/LogRow.astro';
+
+const projects = (await getCollection('projects'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const notes = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latestNotes = notes.slice(0, 3);
+
+const labs = await getCollection('labs');
+
+/* Preview image per shiplog entry, matched by href to whatever collection
+   the entry points at. Entries with no image simply don't get a preview. */
+const byHref = new Map<string, string>();
+for (const p of projects) byHref.set(`/work/${p.id}/`, previewImage(p) ?? '');
+for (const n of notes)    byHref.set(`/notes/${n.id}/`, previewImage(n) ?? '');
+for (const l of labs)     byHref.set(`/labs/${l.id}/`, previewImage(l) ?? '');
+
+/* Labs only. The strip used to be the whole log, which put Agent 2 UI here
+   and again in Field notes below, and made "everything" the only honest
+   title for it. */
+const recent = shiplog.filter((e) => e.kind === 'lab').sort(byDateDesc).slice(0, 6);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
 ---
 
-<BaseLayout title="RUNNER_PORTFOLIO.EXE — Dragos Muntean" bodyClass="homepage-lock">
-  <div class="md:h-screen md:flex md:flex-col">
-  <div class="h-screen flex flex-col">
-    <TopHUD />
+<RaceLayout title="Dragos Muntean — design technologist" doc="DOC RD-01 / INDEX">
 
-    <!-- DESKTOP: 3-column layout (hidden on mobile) -->
-    <main class="hidden md:flex flex-1 min-h-0">
-      <LeftPanel />
+  <HeroPhoto
+    doc="FIELD LOG / 001"
+    meta="47.3769°N 8.5417°E · ZURICH"
+    kicker="Zurich · Design technologist"
+    lede="Designing product since 2008. Now building it too."
+    spec={[
+      { k: 'Base',    v: 'Zurich CH' },
+      { k: 'Now',     v: 'TWINT' },
+      { k: 'Entries', v: String(shiplog.length) },
+      { k: 'Since',   v: '2008' },
+      { k: 'Status',  v: 'Building', now: true },
+    ]}
+  />
 
-      <div class="flex-1 min-w-0 relative bg-game-bg">
-        <ResponsiveGameMount layout="desktop" client:only="react" />
-      </div>
+  <!-- ── selected work ────────────────────────────────── -->
+  <section class="band on-snow">
+    <header class="sechead" data-reveal>
+      <span class="registry">01 / Work</span>
+      <h2>Work, and what changed because of it</h2>
+    </header>
 
-      <RightPanel />
-    </main>
+    <div class="rows">
+      {/* Current role leads the timeline — it is the most recent entry. */}
+      <LogRow
+        n={String(projects.length + 1).padStart(3, '0')}
+        title="TWINT"
+        meta="Product designer · Swiss payments · 2025 —"
+        tag="Under NDA"
+        stagger={0}
+        reveal
+      />
 
-    <!-- MOBILE: stacked single-column layout (hidden on desktop) -->
-    <main class="flex flex-col md:hidden">
-      <!-- 1. Hero + Game -->
-      <div class="px-4 pt-4 pb-2">
-        <HeroBlock mobile />
-      </div>
-      <div class="w-full aspect-[3/4] max-h-[70vh] relative bg-game-bg">
-        <ResponsiveGameMount layout="mobile" client:only="react" />
-      </div>
+      {projects.map((p, i) => (
+        <LogRow
+          n={String(projects.length - i).padStart(3, '0')}
+          title={p.data.title}
+          meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
+          href={`/work/${p.id}/`}
+          figure={p.data.figure ?? 'Case study'}
+          image={previewImage(p)}
+          stagger={i + 1}
+          reveal
+        />
+      ))}
+    </div>
+  </section>
 
-      <!-- 2. Projects -->
-      <ProjectsSection />
+  <!-- ── ship log ─────────────────────────────────────── -->
+  <section class="band on-night">
+    <header class="sechead" data-reveal>
+      <span class="registry">02 / Labs</span>
+      <h2>Labs</h2>
+      <p class="lede">
+        Built for the fun of it, or to help someone out. Most are parked partway,
+        and say so.
+      </p>
+    </header>
 
-      <!-- 3. Blog -->
-      <BlogSection />
+    <div class="rows">
+      {recent.map((e, i) => (
+        <LogRow
+          n={String(e.n).padStart(3, '0')}
+          title={e.title}
+          meta={e.meta}
+          href={e.href}
+          figure={e.figure}
+          image={e.href ? byHref.get(e.href) || null : null}
+          stagger={i}
+          reveal
+        />
+      ))}
+    </div>
+  </section>
 
-      <!-- 4. AI (under construction) -->
-      <AIBossSection />
+  <!-- ── notes ────────────────────────────────────────── -->
+  <section class="band on-snow">
+    <header class="sechead" data-reveal>
+      <span class="registry">03 / Notes</span>
+      <h2>Field notes</h2>
+      <p class="lede">
+        Articles and short pieces, mostly published elsewhere and gathered here.
+      </p>
+    </header>
 
-      <!-- 5. Runner Stats -->
-      <RunnerStats />
-    </main>
+    <div class="rows">
+      {latestNotes.map((n, i) => (
+        <LogRow
+          n={String(latestNotes.length - i).padStart(3, '0')}
+          title={n.data.title}
+          meta={[n.data.platform, ...n.data.tags.slice(0, 3)].filter(Boolean).join(' · ')}
+          href={`/notes/${n.id}/`}
+          figure={fmt(n.data.date)}
+          image={previewImage(n)}
+          stagger={i}
+          reveal
+        />
+      ))}
+    </div>
+  </section>
 
-    <BottomStatusBar />
-  </div>
-</BaseLayout>
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
 
-<script>
-  import gsap from 'gsap';
+  .sechead { margin-bottom: var(--s8); }
+  .sechead .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .sechead h2 { font-size: var(--t-h2); letter-spacing: var(--tr-h2); margin-bottom: var(--s4); }
+  .lede { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); }
 
-  // Card entrance animations
-  gsap.from('[data-animate="card"]', {
-    opacity: 0,
-    y: 20,
-    stagger: 0.08,
-    duration: 0.4,
-    ease: 'power2.out',
-    delay: 0.3,
-  });
-
-  // Score counter animation
-  const scoreEl = document.querySelector('[data-score]');
-  if (scoreEl) {
-    const target = { val: 0 };
-    gsap.to(target, {
-      val: 99999,
-      duration: 2.5,
-      ease: 'power1.inOut',
-      delay: 0.5,
-      onUpdate() {
-        scoreEl.textContent = String(Math.floor(target.val)).padStart(5, '0');
-      },
-    });
-  }
-
-  // HUD fade-in
-  gsap.from('header', {
-    opacity: 0,
-    duration: 0.6,
-    ease: 'power2.out',
-  });
-
-  gsap.from('footer', {
-    opacity: 0,
-    duration: 0.6,
-    ease: 'power2.out',
-    delay: 0.2,
-  });
-
-</script>
+  .rows { border-bottom: 1px solid var(--rule); }
+  .logrow--static { cursor: default; }
+  .logrow--static:hover { background: transparent; }
+</style>
+</RaceLayout>

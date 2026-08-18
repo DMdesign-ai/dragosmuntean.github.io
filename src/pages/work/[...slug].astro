@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import RaceLayout from '../../../layouts/RaceLayout.astro';
+import RaceLayout from '../../layouts/RaceLayout.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -26,7 +26,7 @@ const headline = d.figure;
 
   <!-- ── case hero: night, so the light case-study body reads as the document ── -->
   <section class="band casehero on-night">
-    <a class="back registry hit" href="/v3/work/">← Work</a>
+    <a class="back registry hit" href="/work/">← Work</a>
     <h1 class="casetitle">{d.title}</h1>
     <p class="casedesc">{d.description}</p>
     <dl class="specbar specbar--wide">

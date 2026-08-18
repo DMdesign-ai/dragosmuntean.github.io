@@ -1,8 +1,8 @@
 ---
-import RaceLayout from '../../../layouts/RaceLayout.astro';
+import RaceLayout from '../../layouts/RaceLayout.astro';
 import { getCollection } from 'astro:content';
-import LogRow from '../../../components/race/LogRow.astro';
-import { previewImage } from '../../../lib/preview';
+import LogRow from '../../components/race/LogRow.astro';
+import { previewImage } from '../../lib/preview';
 
 const projects = (await getCollection('projects'))
   .filter((p) => !p.data.draft)
@@ -19,7 +19,7 @@ const fmt = (d: Date) =>
     <h1>Work</h1>
     <p class="lede">
       Newest first. Current work at TWINT is under NDA and appears as a withheld entry —
-      the method behind it is written up in <a class="link" href="/v3/notes/">Notes</a>.
+      the method behind it is written up in <a class="link" href="/notes/">Notes</a>.
       Below that, three projects at On, each with the outcome attached.
     </p>
   </section>
@@ -39,7 +39,7 @@ const fmt = (d: Date) =>
       </dl>
       <p class="entry-note">
         The work itself cannot be shown. Writing about method, using my own projects as the
-        worked examples, is in <a class="link" href="/v3/notes/">Notes</a>.
+        worked examples, is in <a class="link" href="/notes/">Notes</a>.
       </p>
     </article>
   </section>
@@ -51,7 +51,7 @@ const fmt = (d: Date) =>
           n={String(projects.length - i).padStart(3, '0')}
           title={p.data.title}
           meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
-          href={`/v3/work/${p.id}/`}
+          href={`/work/${p.id}/`}
           figure={p.data.figure ?? 'Case study'}
           image={previewImage(p)}
         />

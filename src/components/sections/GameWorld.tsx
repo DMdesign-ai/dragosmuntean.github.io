@@ -20,7 +20,7 @@ export default function GameWorld() {
 
   const handleDoorEnter = useCallback((projectSlug: string) => {
     setTimeout(() => {
-      window.location.href = `${BASE_PATH}/projects/${projectSlug}`;
+      window.location.href = `${BASE_PATH}/work/${projectSlug}`;
     }, 800);
   }, []);
 
