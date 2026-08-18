@@ -1,0 +1,256 @@
+---
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+import { getCollection } from 'astro:content';
+import { roles, initials, DESIGN_SINCE } from '../../../lib/experience';
+
+const projects = (await getCollection('projects')).filter((p) => !p.data.draft);
+const labs = (await getCollection('labs')).filter((l) => !l.data.draft);
+const notes = (await getCollection('blog')).filter((n) => !n.data.draft);
+
+const years = new Date().getFullYear() - DESIGN_SINCE;
+
+const facts = [
+  { k: 'Based',  v: 'Zurich, CH' },
+  { k: 'Now',    v: 'TWINT' },
+  { k: 'Since',  v: String(DESIGN_SINCE) },
+  { k: 'Years',  v: String(years) },
+  { k: 'Roles',  v: String(roles.length) },
+  { k: 'Status', v: 'Employed', now: true },
+];
+
+const practice = [
+  ['Design',   'Product design, UX research, interaction design, design systems'],
+  ['Building', 'TypeScript, Astro, Canvas, Figma Plugin API, Chrome extensions'],
+  ['With AI',  'Claude Code, Cursor, Figma Make, agent tooling, meta-prompting'],
+];
+
+const elsewhere = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dragos-muntean/' },
+  { label: 'GitHub',   href: 'https://github.com/DMdesign-ai' },
+];
+---
+
+<RaceLayout
+  title="About — Dragos Muntean"
+  description="Design technologist in Zurich. Product design at TWINT, previously On."
+  ground="snow"
+  doc="DOC RD-07 / ABOUT"
+>
+
+  <!-- ── profile header ─────────────────────────────────── -->
+  <section class="band on-night head">
+    <span class="registry">07 / About</span>
+    <h1 class="name">Dragos Muntean</h1>
+    <p class="headline">
+      Senior UX/UI Designer. {years} years designing product, now building it too.
+    </p>
+    <dl class="specbar specbar--wide">
+      {facts.map((f) => (
+        <div><dt>{f.k}</dt><dd class={f.now ? 'is-now' : undefined}>{f.v}</dd></div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- ── about ──────────────────────────────────────────── -->
+  <section class="band on-snow">
+    <div class="col">
+      <span class="registry">About</span>
+      <div class="prose">
+        <p>
+          I have been designing since 2008, which covers a telecoms brand, leading
+          design at a startup, five years running my own practice in Berlin, and
+          three years at On making everything that happens after the order less
+          painful. Somewhere in the last few years I started building the things
+          I had spent most of that time specifying, and it changed the work more
+          than any tool ever had.
+        </p>
+        <p>
+          Most of what I make now sits between the two. Design systems that are
+          also code. Plugins that fix a problem I hit in a file that morning.
+          Extensions, games, small tools, a lot of them unfinished on purpose.
+        </p>
+        <p>
+          I run, which is where the structure of this site comes from. A log is
+          judged on cadence rather than on any single entry, and that is a kinder
+          and more accurate way to look at a decade of work than a highlight reel.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── experience ─────────────────────────────────────── -->
+  <section class="band on-snow tight">
+    <div class="col">
+      <span class="registry">Experience</span>
+      <ol class="roles">
+        {roles.map((r) => (
+          <li class="role">
+            <div class="role__logo">
+              {r.logo
+                ? <img src={r.logo} alt="" aria-hidden="true" loading="lazy" />
+                : <span aria-hidden="true">{initials(r.org)}</span>}
+            </div>
+
+            <div class="role__body">
+              <h2 class="role__title">
+                {r.title}
+                {r.current && <span class="marker-now">Current</span>}
+              </h2>
+              <p class="role__org">{r.org}{r.kind && <> · {r.kind}</>}</p>
+              <p class="role__when">
+                {r.from} – {r.to} · {r.span}{r.place && <> · {r.place}</>}
+              </p>
+              {r.note && <p class="role__note">{r.note}</p>}
+
+              {r.clients && (
+                <ul class="clients">
+                  {r.clients.map((c) => (
+                    <li class="client">
+                      <div class="client__logo">
+                        {c.logo
+                          ? <img src={c.logo} alt="" aria-hidden="true" loading="lazy" />
+                          : <span aria-hidden="true">{initials(c.org)}</span>}
+                      </div>
+                      <div>
+                        <p class="client__org">{c.org}</p>
+                        <p class="role__when">{c.from} – {c.to} · {c.span}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ── practice ───────────────────────────────────────── -->
+  <section class="band on-snow tight">
+    <div class="col">
+      <span class="registry">Practice</span>
+      <dl class="practice">
+        {practice.map(([k, v]) => (
+          <div><dt>{k}</dt><dd>{v}</dd></div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── contact ────────────────────────────────────────── -->
+  <section class="band on-night tight contact">
+    <div class="col">
+      <span class="registry">Elsewhere</span>
+      <ul class="links">
+        {elsewhere.map((l) => (
+          <li><a class="link" href={l.href}>{l.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s12); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .head { padding-top: var(--s16); }
+  .head .registry { display: block; margin-bottom: var(--s6); color: var(--fg-dim); }
+  .name {
+    font-size: clamp(2.5rem, 9vw, 6rem); letter-spacing: var(--tr-h1);
+    line-height: 0.94; margin-bottom: var(--s6);
+  }
+  .headline {
+    font-size: var(--t-lead); line-height: 1.5;
+    color: var(--fg-dim); margin-bottom: var(--s12); max-width: 40ch;
+  }
+
+  .col { max-width: 68rem; }
+  .col > .registry { display: block; margin-bottom: var(--s6); color: var(--fg-dim); }
+
+  /* LinkedIn's row structure: logo column, then title / org / dates / note.
+     Hairline between entries, nothing boxed. */
+  .roles { list-style: none; padding: 0; margin: 0; }
+  .role {
+    display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: var(--s4);
+    padding: var(--s6) 0; border-top: 1px solid var(--rule);
+  }
+  .role:last-child { border-bottom: 1px solid var(--rule); }
+
+  .role__logo, .client__logo {
+    width: 3.5rem; height: 3.5rem;
+    display: grid; place-items: center;
+    background: var(--raise);
+    outline: 1px solid var(--img-edge); outline-offset: -1px;
+  }
+  .client__logo { width: 2.25rem; height: 2.25rem; }
+  .role__logo img, .client__logo img {
+    width: 100%; height: 100%; object-fit: contain; padding: 0.4rem;
+    /* greyscale so a row of brand colours doesn't fight the page */
+    filter: grayscale(1) contrast(0.9);
+  }
+  .role__logo span, .client__logo span {
+    font-family: var(--f-display); font-weight: 600; font-size: var(--t-14);
+    letter-spacing: 0.02em; color: var(--fg-faint);
+  }
+  .client__logo span { font-size: var(--t-11); }
+
+  .role__title {
+    font-size: var(--t-h3); letter-spacing: -0.015em;
+    display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  }
+  .role__org { margin-top: var(--s1); font-size: var(--t-body); color: var(--fg); }
+  .role__when {
+    margin-top: var(--s1);
+    font-family: var(--f-mono); font-size: var(--t-11);
+    letter-spacing: var(--tr-mono-t); color: var(--fg-faint);
+  }
+  .role__note {
+    margin-top: var(--s3); font-size: var(--t-14);
+    line-height: 1.6; color: var(--fg-dim); max-width: 62ch;
+  }
+
+  .clients { list-style: none; padding: 0; margin: var(--s6) 0 0; display: grid; gap: var(--s4); }
+  .client { display: grid; grid-template-columns: 2.25rem minmax(0,1fr); gap: var(--s3); align-items: start; }
+  .client__org { font-size: var(--t-14); color: var(--fg); }
+
+  @media (max-width: 560px) {
+    .role { grid-template-columns: 2.75rem minmax(0,1fr); gap: var(--s3); }
+    .role__logo { width: 2.75rem; height: 2.75rem; }
+  }
+
+  .practice { display: grid; gap: 1px; background: var(--rule);
+              border-block: 1px solid var(--rule); }
+  .practice > div {
+    background: var(--ground); padding: var(--s4) 0;
+    display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--s6);
+    align-items: baseline;
+  }
+  .practice dt {
+    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    text-transform: uppercase; color: var(--fg-faint);
+  }
+  .practice dd { margin: 0; font-size: var(--t-body); color: var(--fg); }
+  @media (max-width: 560px) {
+    .practice > div { grid-template-columns: 1fr; gap: var(--s2); }
+  }
+
+  .contact .links { list-style: none; padding: 0; margin: 0;
+                    display: flex; flex-wrap: wrap; gap: var(--s6) var(--s8); }
+  .contact .links a {
+    font-family: var(--f-display); font-size: var(--t-h3); font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+</style>
+</RaceLayout>

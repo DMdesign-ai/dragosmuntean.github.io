@@ -1,0 +1,142 @@
+---
+import { getCollection, render } from 'astro:content';
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+import ResponsiveGameMount from '../../../components/sections/ResponsiveGameMount.tsx';
+
+export async function getStaticPaths() {
+  const labs = await getCollection('labs');
+  return labs
+    .filter((l) => !l.data.draft)
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const notes = await getCollection('blog');
+const related = d.note ? notes.find((n) => n.id === d.note) : undefined;
+
+/* The runner is the one exhibit that can be embedded and played in place. */
+const playable = entry.id === 'runner';
+---
+
+<RaceLayout
+  title={`${d.title} — Dragos Muntean`}
+  description={d.description}
+  ground="snow"
+  doc="DOC RD-06 / LAB"
+>
+
+  <section class="band labhero on-night">
+    <a class="back registry hit" href="/v3/labs/">← Labs</a>
+    <h1 class="labtitle">{d.title}</h1>
+    <p class="labdesc">{d.description}</p>
+    <dl class="specbar specbar--wide">
+      <div><dt>Year</dt><dd>{d.date.getFullYear()}</dd></div>
+      <div><dt>Built with</dt><dd>{d.stack.join(', ')}</dd></div>
+      {d.figure && <div><dt>Figure</dt><dd>{d.figure}</dd></div>}
+      <div><dt>Status</dt><dd class="is-now">{d.status}</dd></div>
+    </dl>
+  </section>
+
+  {playable && (
+    <section class="band on-night exhibit">
+      <span class="registry">Playable · arrow keys on desktop, swipe on mobile</span>
+      <div class="exhibit__frame">
+        <ResponsiveGameMount layout="desktop" client:only="react" />
+        <ResponsiveGameMount layout="mobile" client:only="react" />
+      </div>
+    </section>
+  )}
+
+  {d.live && !playable && (
+    <section class="band on-night exhibit">
+      <span class="registry">Live</span>
+      <p class="exhibit__cta">
+        <a class="link" href={d.live}>Open {d.title} →</a>
+      </p>
+    </section>
+  )}
+
+
+  {d.image && (
+    <section class="band on-snow lead">
+      <figure class="leadfig">
+        <img src={d.image} alt="" loading="eager" decoding="async" />
+      </figure>
+    </section>
+  )}
+  <section class="band on-snow tight">
+    <article class="prose">
+      <Content />
+    </article>
+  </section>
+
+  <section class="band on-snow tight foot">
+    {related && (
+      <p class="related">
+        Written up in <a class="link" href={`/v3/notes/${related.id}/`}>{related.data.title}</a>.
+      </p>
+    )}
+    <a class="backlink link hit" href="/v3/labs/">← All labs</a>
+  </section>
+
+<style>
+  /* Lead image. Notes and labs carry their image in frontmatter rather than
+     inline in the body, so the page renders it here — otherwise it would only
+     ever be seen as a hover thumbnail on an index. */
+  .lead { padding-block: var(--s12) 0; }
+  .leadfig { margin: 0; }
+  .leadfig img {
+    display: block; width: 100%; height: auto;
+    max-width: min(100%, 76rem);
+    outline: 1px solid var(--img-edge);
+    outline-offset: -1px;
+  }
+
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s12); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .labhero { padding-top: var(--s12); }
+  .back { display: inline-block; margin-bottom: var(--s12); color: var(--fg-dim); text-decoration: none; }
+  .back:hover { color: var(--fg); }
+  .labtitle {
+    font-size: var(--t-h1); letter-spacing: var(--tr-h1); line-height: 0.98;
+    margin-bottom: var(--s6); max-width: 18ch;
+  }
+  .labdesc { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); margin-bottom: var(--s12); }
+
+  .exhibit { padding-block: var(--s12); border-top: 1px solid var(--rule); }
+  .exhibit .registry { display: block; margin-bottom: var(--s6); color: var(--fg-dim); }
+  /* GameWorld sizes itself from a ResizeObserver on a height:100% container,
+     so this frame needs a DEFINITE height. With height:auto the percentage
+     resolves to auto, the observer never sees a real box, and the game never
+     starts — the canvas just sits at its 2:1 intrinsic ratio. */
+  .exhibit__frame {
+    border: 1px solid var(--rule); background: var(--raise); padding: var(--s4);
+    height: min(72svh, 640px);
+  }
+  .exhibit__frame > :global(astro-island) { display: block; height: 100%; }
+  .exhibit__cta { font-size: var(--t-lead); }
+
+  .foot { display: flex; flex-wrap: wrap; gap: var(--s4) var(--s8); align-items: baseline; }
+  .foot > * { max-width: none; }
+  .related { font-size: var(--t-14); color: var(--fg-dim); }
+  .backlink {
+    font-family: var(--f-mono); font-size: var(--t-11);
+    letter-spacing: var(--tr-mono-t); text-transform: uppercase; margin-left: auto;
+  }
+</style>
+</RaceLayout>

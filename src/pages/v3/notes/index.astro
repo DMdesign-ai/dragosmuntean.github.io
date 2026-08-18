@@ -1,0 +1,67 @@
+---
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+import { getCollection } from 'astro:content';
+import LogRow from '../../../components/race/LogRow.astro';
+import { previewImage } from '../../../lib/preview';
+
+const notes = (await getCollection('blog'))
+  .filter((n) => !n.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
+---
+
+<RaceLayout
+  title="Notes — Dragos Muntean"
+  description="Field notes on AI, design tooling and building software as a designer."
+  ground="snow"
+  doc="DOC RD-05 / NOTES"
+>
+
+  <section class="band on-snow head">
+    <span class="registry">05 / Notes</span>
+    <h1>Field notes</h1>
+    <p class="lede">
+      Articles and shorter pieces, most of them written for somewhere else and
+      collected here so they stop scattering across platforms. Newest first.
+    </p>
+  </section>
+
+  <section class="band on-snow tight">
+    <div class="rows">
+      {notes.map((n, i) => (
+        <LogRow
+          n={String(notes.length - i).padStart(3, '0')}
+          title={n.data.title}
+          meta={[n.data.platform, ...n.data.tags.slice(0, 3)].filter(Boolean).join(' · ')}
+          href={`/v3/notes/${n.id}/`}
+          figure={fmt(n.data.date)}
+          image={previewImage(n)}
+        />
+      ))}
+    </div>
+  </section>
+
+<style>
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s8); }
+  .head { padding-bottom: var(--s8); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .head .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .head h1 { font-size: var(--t-h1); letter-spacing: var(--tr-h1); margin-bottom: var(--s6); }
+  .lede { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); }
+  .rows { border-bottom: 1px solid var(--rule); }
+</style>
+</RaceLayout>

@@ -1,0 +1,103 @@
+---
+import { getCollection, render } from 'astro:content';
+import RaceLayout from '../../../layouts/RaceLayout.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('blog');
+  return notes
+    .filter((n) => !n.data.draft)
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+const fmtLong = (dt: Date) =>
+  dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/* Reading time from the raw body: ~230 wpm, rounded up, floor of 1. */
+const words = entry.body?.trim().split(/\s+/).length ?? 0;
+const minutes = Math.max(1, Math.ceil(words / 230));
+---
+
+<RaceLayout
+  title={`${d.title} — Dragos Muntean`}
+  description={d.description}
+  ground="snow"
+  doc="DOC RD-05 / NOTE"
+>
+
+  <section class="band notehero on-night">
+    <a class="back registry hit" href="/v3/notes/">← Notes</a>
+    <h1 class="notetitle">{d.title}</h1>
+    <p class="notedesc">{d.description}</p>
+    <dl class="specbar specbar--wide">
+      <div><dt>Published</dt><dd>{fmtLong(d.date)}</dd></div>
+      <div><dt>Reading</dt><dd>{minutes} min</dd></div>
+      <div><dt>Topics</dt><dd>{d.tags.slice(0, 3).join(', ')}</dd></div>
+      {d.platform && <div><dt>Published on</dt><dd>{d.platform}</dd></div>}
+    </dl>
+  </section>
+
+
+  {d.image && (
+    <section class="band on-snow lead">
+      <figure class="leadfig">
+        <img src={d.image} alt="" loading="eager" decoding="async" />
+      </figure>
+    </section>
+  )}
+  <section class="band on-snow tight">
+    <article class="prose">
+      <Content />
+    </article>
+  </section>
+
+  <section class="band on-snow tight">
+    <a class="backlink link hit" href="/v3/notes/">← All notes</a>
+  </section>
+
+<style>
+  /* Lead image. Notes and labs carry their image in frontmatter rather than
+     inline in the body, so the page renders it here — otherwise it would only
+     ever be seen as a hover thumbnail on an index. */
+  .lead { padding-block: var(--s12) 0; }
+  .leadfig { margin: 0; }
+  .leadfig img {
+    display: block; width: 100%; height: auto;
+    max-width: min(100%, 76rem);
+    outline: 1px solid var(--img-edge);
+    outline-offset: -1px;
+  }
+
+  .band { padding: var(--s24) var(--s6); }
+  .band > * { max-width: 68rem; margin-inline: auto; }
+  /* `margin-inline: auto` above centres block children in the 68rem column but
+     does nothing for inline boxes, which stay at the band's padding edge and
+     read as labels floating off to the left. Put them on the same edge. */
+  .band > .back,
+  .band > .backlink,
+  .band > .registry,
+  .band > .rows-note,
+  .band > .origin,
+  .band > .related { margin-inline-start: max(0px, calc((100% - 68rem) / 2)); margin-inline-end: 0; }
+  .band.tight { padding-block: var(--s12); }
+  @media (max-width: 640px) { .band { padding: var(--s16) var(--s4); } }
+
+  .notehero { padding-top: var(--s12); }
+  .back { display: inline-block; margin-bottom: var(--s12); color: var(--fg-dim); text-decoration: none; }
+  .back:hover { color: var(--fg); }
+  .notetitle {
+    font-size: var(--t-h1); letter-spacing: var(--tr-h1); line-height: 0.98;
+    margin-bottom: var(--s6); max-width: 20ch;
+  }
+  .notedesc { font-size: var(--t-lead); line-height: 1.5; color: var(--fg-dim); margin-bottom: var(--s12); }
+
+  .origin { font-size: var(--t-14); color: var(--fg-dim); }
+  .backlink {
+    font-family: var(--f-mono); font-size: var(--t-11);
+    letter-spacing: var(--tr-mono-t); text-transform: uppercase;
+  }
+</style>
+</RaceLayout>

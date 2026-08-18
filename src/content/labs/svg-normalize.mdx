@@ -1,0 +1,27 @@
+---
+title: "svg-normalize"
+description: "A Figma plugin and web tool that makes a pile of inconsistent SVG icons behave like a set."
+date: 2026-03-01
+tags: ["Figma plugin", "SVG", "Design systems"]
+figure: "43 commits, 4 rewrites"
+stack: ["TypeScript", "Figma Plugin API", "Claude Code"]
+note: "from-zero-to-figma-plugins"
+image: "/images/labs/svg-normalize.webp"
+status: "Parked"
+---
+
+## The problem
+
+Icon sets drift. Different artboard sizes, inconsistent stroke widths, transforms baked into paths, coordinates that assume a viewBox nobody kept. Individually each icon looks fine. Together they will not line up.
+
+## What it does
+
+Normalises SVG icons so a set behaves like a set: consistent viewBox, flattened transforms, predictable stroke handling. It was built twice over, as a Figma plugin for working inside a file and as a web tool for working on exported ones.
+
+Not published. It does the job it was built for and it sits where it was built.
+
+## What the build was like
+
+**43 commits and four rewrites.** The rewrites are the honest part of that number: the transform-flattening maths was wrong three times before it was right, and each attempt looked correct until it met an icon with a nested `transform` on a group.
+
+Built with Claude Code, which is written up in the note.

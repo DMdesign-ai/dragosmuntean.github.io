@@ -1,0 +1,38 @@
+---
+title: "EduTube"
+description: "A Chrome extension that puts a learning sidebar over YouTube. The extension works. The AI in the middle of it does not, yet."
+date: 2025-05-01
+tags: ["Chrome extension", "AI", "Learning"]
+figure: "Blocked on API"
+stack: ["Manifest V3", "JavaScript", "Claude API", "Cursor"]
+image: "/images/labs/edutube.webp"
+status: "In progress"
+---
+
+## What it is
+
+A Manifest V3 extension that injects a panel into YouTube, alongside the player, while a video is running. Four tabs: **Notes**, **Key Points**, **Analytics**, **Resources**.
+
+Notes are anchored to the video clock. Write one at 0:17 and it is filed at 0:17, so the list you leave with is a set of marks against the thing you were watching rather than a page of loose text.
+
+The intended loop from there: pull the key points out of the video, combine them with whatever you wrote down, and generate a quiz from both. The quiz is the actual point. It is the step from having watched something to being able to recall it.
+
+## The real reason it exists
+
+I wanted to learn Cursor. EduTube was the thing I built to learn it on.
+
+It started in Claude 3.7 and moved into Cursor partway through, which meant picking up browser extension development, Manifest V3, GitHub and meta-prompting on the way. The extension was the excuse; the tooling was the lesson.
+
+## Where it is stuck
+
+The Claude integration is meant to read the video content and produce summaries. Right now it returns `Failed to fetch`.
+
+That is a browser extension problem more than an API problem. An extension's permission model, its security boundary and a cross-origin request to an external service all have to line up, and one of them doesn't. Everything downstream is blocked behind it: no summaries, no extracted key points, no quiz.
+
+## What does work
+
+It installs, injects cleanly into YouTube's page, and the sidebar framework is functional. Note-taking works. The tabs are there. It is a real running base with a hole in the middle of it.
+
+## What it has taught me so far
+
+Integrating with a platform as complicated as YouTube is not a small job, and permissions and security want thinking about before you write anything rather than after. Error handling around an external API is not a finishing touch, it is the feature. And a panel living inside someone else's page has to look like it belongs there, or it reads as malware.

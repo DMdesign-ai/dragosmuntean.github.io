@@ -1,0 +1,179 @@
+---
+import { Picture } from 'astro:assets';
+/* AVIF is deliberately not generated: measured on this photograph it came out
+   larger than WebP at the same quality (235 KB vs 164 KB at 1440w), and the
+   browser picks the first supported source, so it would ship the bigger file. */
+import ridge from '../../assets/hero/ridge.jpg';
+
+interface Props {
+  /** Mono code shown top left, e.g. "FIELD LOG / 001". */
+  doc?: string;
+  /** Mono value shown top right. */
+  meta?: string;
+  /** Small line above the wordmark. */
+  kicker?: string;
+  /** One sentence under the wordmark. */
+  lede?: string;
+  /** Spec bar entries. The last one may be marked live. */
+  spec?: { k: string; v: string; now?: boolean }[];
+}
+
+const {
+  doc = 'FIELD LOG / 001',
+  meta = '47.3769°N 8.5417°E · 03:40',
+  kicker = 'Zurich · Design technologist',
+  lede = 'Designing product since 2008. Now building it too.',
+  spec = [
+    { k: 'Base',   v: 'Zurich CH' },
+    { k: 'Since',  v: '2008' },
+    { k: 'Focus',  v: 'Product, agents' },
+    { k: 'Status', v: 'Building', now: true },
+  ],
+} = Astro.props;
+
+const NAME1 = 'DRAGOS'.split('');
+const NAME2 = 'MUNTEAN'.split('');
+---
+
+<section class="phero on-night">
+  <Picture
+    class="phero__bed"
+    src={ridge}
+    alt=""
+    aria-hidden="true"
+    widths={[900, 1440, 1587]}
+    sizes="100vw"
+    formats={['webp']}
+    fallbackFormat="jpg"
+    quality={70}
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="phero__grade" aria-hidden="true"></div>
+
+  <div class="phero__in">
+    <div class="phero__rail">
+      <span class="registry">{doc}</span>
+      <span class="registry">{meta}</span>
+    </div>
+
+    <div class="phero__mid">
+      <p class="registry phero__kicker">{kicker}</p>
+      <h1 class="wordmark phero__mark" aria-label="Dragos Muntean">
+        <span class="phero__line">{NAME1.map((ch, i) => (
+          <span class="phero__ch" style={`--i:${i}`} aria-hidden="true">{ch}</span>
+        ))}</span>
+        <span class="phero__line">{NAME2.map((ch, i) => (
+          <span class="phero__ch" style={`--i:${i + NAME1.length}`} aria-hidden="true">{ch}</span>
+        ))}</span>
+      </h1>
+      <p class="phero__lede">{lede}</p>
+    </div>
+
+    <dl class="specbar specbar--wide">
+      {spec.map((sp) => (
+        <div>
+          <dt>{sp.k}</dt>
+          <dd class={sp.now ? 'is-now' : undefined}>{sp.v}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+
+  <div class="phero__grain" aria-hidden="true"></div>
+</section>
+
+<style>
+  .phero {
+    position: relative;
+    /* The sticky header is in flow, so a bare 100svh pushes the spec bar
+       11px below the fold at 900px tall. Subtract the header. */
+    height: calc(100svh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+    overflow: hidden; isolation: isolate;
+    --t-mark: clamp(3.5rem, 16.5vw, 15rem);
+  }
+
+  .phero__bed {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center 58%;
+    transform-origin: 52% 55%;
+    /* The source is bright daylight, so it is cooled and desaturated to sit
+       with the rest of the document rather than reading as a postcard. */
+    filter: saturate(0.62) contrast(1.06) brightness(0.86) hue-rotate(-6deg);
+  }
+
+  /* Scrim over the photograph. The mid-band alphas are set by measurement,
+     not by eye: the snowfield behind the wordmark reaches rgb(172,174,177)
+     after the filter, and at the old 0.26 alpha the wordmark measured 1.88:1
+     against it — below the 3:1 large-text floor. The lede and spec labels
+     failed too (2.90 and 3.69 against a 4.5 floor).
+     These values put the worst case at 4.44 / 5.58 / 5.21. Re-measure if the
+     photograph is ever swapped: a brighter image needs a heavier scrim. */
+  .phero__grade {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(5,11,24,0.90) 0%,
+      rgba(5,11,24,0.76) 18%,
+      rgba(5,11,24,0.56) 40%,
+      rgba(5,11,24,0.54) 60%,
+      rgba(5,11,24,0.72) 78%,
+      rgba(5,11,24,0.94) 100%);
+  }
+
+  .phero__grain {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .phero__in {
+    position: relative; z-index: 2; height: 100%;
+    max-width: 74rem; margin-inline: auto; padding: var(--s6) var(--s6) var(--s4);
+    display: flex; flex-direction: column; justify-content: space-between; gap: var(--s8);
+  }
+  .phero__rail {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s2);
+    border-bottom: 1px solid rgba(233,237,230,0.16); padding-bottom: var(--s3);
+  }
+  .phero__mid { margin-block: auto; }
+  .phero__kicker { display: block; margin-bottom: var(--s4); color: rgba(233,237,230,0.66); }
+
+  .phero__mark { max-width: none; margin-left: -0.06em; }
+  /* letters are inline-blocks, so the line must be told not to wrap —
+     it bleeds past the container instead, which is the intent */
+  .phero__line { display: block; white-space: nowrap; }
+  .phero__ch { display: inline-block; }
+
+  .phero__lede {
+    margin-top: var(--s4); font-size: var(--t-lead);
+    color: rgba(233,237,230,0.82);
+  }
+  .phero .specbar { border-top-color: rgba(233,237,230,0.16); }
+
+  /* --- entrance: one-shot, so keyframes are the right tool --- */
+  :global(html.js) .phero__ch {
+    opacity: 0; transform: translateY(0.14em); filter: blur(6px);
+    animation: pheroCh 620ms var(--ease) forwards;
+    animation-delay: calc(var(--i) * 55ms + 120ms);
+  }
+  @keyframes pheroCh { to { opacity: 1; transform: none; filter: blur(0); } }
+
+  :global(html.js) .phero__lede {
+    opacity: 0; animation: pheroFade 700ms var(--ease) forwards; animation-delay: 1000ms;
+  }
+  @keyframes pheroFade { to { opacity: 1; } }
+
+  :global(html.js) .phero__bed { animation: pheroKen 24s var(--ease) forwards; }
+  @keyframes pheroKen { from { transform: scale(1.06); } to { transform: scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .phero__ch,
+    :global(html.js) .phero__lede { opacity: 1; transform: none; filter: none; animation: none; }
+    :global(html.js) .phero__bed { animation: none; transform: none; }
+  }
+
+  @media (max-width: 640px) {
+    .phero__in { padding-inline: var(--s4); }
+  }
+</style>

@@ -1,0 +1,614 @@
+---
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '../styles/race.css';
+
+/** Split a word into spans so each letter can be staggered independently. */
+const letters = (word: string) => word.split('');
+const NAME1 = letters('DRAGOS');
+const NAME2 = letters('MUNTEAN');
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Hero lab — three treatments</title>
+  <script is:inline>
+    document.documentElement.classList.add('js');
+    // ?only=a|b|c shows a single hero full-screen. Handy for reviewing one
+    // treatment without the others, and for capturing clean frames.
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var only = q.get('only');
+      if (only) document.documentElement.setAttribute('data-only', only);
+      if (q.has('still')) document.documentElement.setAttribute('data-still', '');
+    })();
+  </script>
+</head>
+<body class="on-night">
+
+  <!-- ══════════ A — ALPENGLOW ══════════════════════════════ -->
+  <section class="hero on-night" id="a">
+    <canvas class="bed" id="ridge-a" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="hero-in">
+      <div class="rail">
+        <span class="registry">FIELD LOG / 001</span>
+        <span class="registry">47.3769°N 8.5417°E · 06:12</span>
+      </div>
+      <div class="hero-mid">
+        <p class="kicker registry">Zurich · Design technologist</p>
+        <h1 class="wordmark bleed">DRAGOS<br />MUNTEAN</h1>
+        <p class="lede">Designing product since 2008. Now building it too.</p>
+      </div>
+      <dl class="specbar specbar--wide">
+        <div><dt>Light</dt><dd>Moon, 03:40</dd></div>
+        <div><dt>Render</dt><dd>Canvas 2D</dd></div>
+        <div><dt>Weight</dt><dd>0 KB assets</dd></div>
+        <div><dt>Status</dt><dd class="is-now">Building</dd></div>
+      </dl>
+    </div>
+    <span class="tag">A · Moonlit</span>
+  </section>
+
+  <div class="note on-snow">
+    <div class="note-in">
+      <span class="registry">A / Moonlit</span>
+      <h2>Layered ridgelines, drawn not photographed</h2>
+      <p>Built to match MASSIF's hero: cold moonlit night instead of warm dawn. Seven ridges from fractal noise, each drifting at its own speed, washing out to blue haze with distance. A starfield thins towards the horizon, the moon sits high and right, and snow catches light along the crests while the nearest ridge falls to near-black.</p>
+      <p><strong>Why it fits:</strong> no image files, no licensing, nothing to load. It draws itself from a fixed seed, so it is identical on every visit but unique to this site. Cheap enough to run on a phone.</p>
+      <p><strong>Against it:</strong> it is an illustration. It will never have the emotional pull of a real photograph of a real morning.</p>
+    </div>
+  </div>
+
+  <!-- ══════════ B — DRONE ═════════════════════════════════ -->
+  <section class="hero hero--drone on-night" id="b">
+    <canvas class="bed bed--far" id="drone-far" aria-hidden="true"></canvas>
+    <div class="hero-in">
+      <div class="rail">
+        <span class="registry">FIELD LOG / 002</span>
+        <span class="registry">ELEV 2 040 M · HDG 214°</span>
+      </div>
+      <div class="hero-mid">
+        <p class="kicker registry">Zurich · Design technologist</p>
+        <h1 class="wordmark bleed mark-split" aria-label="Dragos Muntean">
+          <span class="line">{NAME1.map((ch, i) => (
+            <span class="ch" style={`--i:${i}`} aria-hidden="true">{ch}</span>
+          ))}</span>
+          <span class="line">{NAME2.map((ch, i) => (
+            <span class="ch" style={`--i:${i + NAME1.length}`} aria-hidden="true">{ch}</span>
+          ))}</span>
+        </h1>
+        <p class="lede lede--delay">Designing product since 2008. Now building it too.</p>
+      </div>
+      <dl class="specbar specbar--wide">
+        <div><dt>Camera</dt><dd>Drone, forward</dd></div>
+        <div><dt>Terrain</dt><dd>Endless, GPU</dd></div>
+        <div><dt>Weight</dt><dd>124 KB gzip</dd></div>
+        <div><dt>Status</dt><dd class="is-now">Flying</dd></div>
+      </dl>
+    </div>
+    <canvas class="bed bed--near" id="drone-near" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <span class="tag">B · Drone</span>
+  </section>
+
+  <div class="note on-snow">
+    <div class="note-in">
+      <span class="registry">B / Terrain</span>
+      <h2>A drone that never lands</h2>
+      <p>The terrain is generated on the GPU from a noise field that scrolls underneath a fixed camera, so the flight never repeats and never loops back to the same ridge. Nothing here is tied to scrolling: it runs on its own, and pauses the moment the hero leaves the screen.</p>
+      <p>The letters set themselves one at a time, and the near ridges pass <strong>in front</strong> of them while the distant range stays behind. That is two layers with your name in the middle, which is what makes the flight feel like it has depth rather than being wallpaper.</p>
+      <p><strong>Why it fits:</strong> it is the most convincing of the three, and three.js is already in your dependencies from the arcade game, so it costs nothing new to adopt.</p>
+      <p><strong>Against it:</strong> I measured the bundle at 494 KB raw, 124 KB gzipped, against 3 KB for the current home page. That is a live GPU loop and a forty-fold jump in JavaScript on the first thing anyone loads. It is also the option most likely to read as showing off, which cuts against chill.</p>
+    </div>
+  </div>
+
+  <!-- ══════════ C — PHOTO BED ══════════════════════════════ -->
+  <section class="hero hero--photo on-night" id="c">
+    <!-- Real image if one exists, generated ridge underneath as fallback. -->
+    <canvas class="bed bed--far" id="ridge-c" aria-hidden="true"></canvas>
+    <img
+      class="bed bed--photo"
+      id="hero-photo"
+      src="/images/hero/ridge.jpg"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      fetchpriority="high"
+      onerror="this.remove()"
+    />
+    <div class="photo-grade" aria-hidden="true"></div>
+    <div class="hero-in">
+      <div class="rail">
+        <span class="registry">FIELD LOG / 003</span>
+        <span class="registry">47.3769°N 8.5417°E · 03:40</span>
+      </div>
+      <div class="hero-mid">
+        <p class="kicker registry">Zurich · Design technologist</p>
+        <h1 class="wordmark bleed mark-split" aria-label="Dragos Muntean">
+          <span class="line">{NAME1.map((ch, i) => (
+            <span class="ch" style={`--i:${i}`} aria-hidden="true">{ch}</span>
+          ))}</span>
+          <span class="line">{NAME2.map((ch, i) => (
+            <span class="ch" style={`--i:${i + NAME1.length}`} aria-hidden="true">{ch}</span>
+          ))}</span>
+        </h1>
+        <p class="lede lede--delay">Designing product since 2008. Now building it too.</p>
+      </div>
+      <dl class="specbar specbar--wide">
+        <div><dt>Bed</dt><dd>Photograph</dd></div>
+        <div><dt>Motion</dt><dd>Slow scale, 24 s</dd></div>
+        <div><dt>Grade</dt><dd>Cool, low contrast</dd></div>
+        <div><dt>Status</dt><dd class="is-now">Live</dd></div>
+      </dl>
+    </div>
+    <div class="grain" aria-hidden="true"></div>
+    <span class="tag">C · Photo bed</span>
+  </section>
+
+  <div class="note on-snow">
+    <div class="note-in">
+      <span class="registry">C / Photo bed</span>
+      <h2>The one I would actually pick, if you have the photographs</h2>
+      <p>What you see behind this hero is still the generated ridge from A, standing in for a real image so you can judge the composition. The layout is the point: a full-bleed photograph, the wordmark set enormous and allowed to sit half over it, a warm low-contrast grade, and a very slow scale that you notice only if you stare.</p>
+      <p><strong>Why it fits:</strong> both references I checked reach cosiness the same way. Echo Vale and Vacance keep their interface almost monochrome and let a real photograph carry all the warmth. Golden light on a real mountain does something no gradient does, and it costs one image.</p>
+      <p><strong>What it needs from you:</strong> two or three of your own photographs. You run in Switzerland, so you almost certainly have better source material than any stock library, and using your own also means the hero is a place you have actually been. Early light, haze, a ridge with depth. Horizontal, ideally 2400px wide or more.</p>
+      <p class="warn">This is the only option I cannot finish without you. Everything else here is done.</p>
+    </div>
+  </div>
+
+  <footer class="foot on-night">
+    <span class="registry">Hero lab · three treatments</span>
+    <span class="registry">All respect prefers-reduced-motion</span>
+    <span class="registry">Pick one, or mix A and C</span>
+  </footer>
+
+<style>
+  /* solo mode: hide everything except the requested hero */
+  :global(html[data-only] .note),
+  :global(html[data-only] .foot) { display: none; }
+  :global(html[data-only="a"]) #b, :global(html[data-only="a"]) #c,
+  :global(html[data-only="b"]) #a, :global(html[data-only="b"]) #c,
+  :global(html[data-only="c"]) #a, :global(html[data-only="c"]) #b { display: none; }
+
+  .hero {
+    position: relative; min-height: 100svh; overflow: hidden;
+    display: flex; align-items: stretch;
+  }
+  .bed { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* Drone hero stacks: sky + far range, then the name, then near ridges
+     on top. The name sitting between the two layers is what gives depth. */
+  .hero--drone {
+    isolation: isolate;
+    height: 100svh;            /* exactly the viewport, not just a minimum */
+    min-height: 100svh;
+  }
+  /* B is the full-bleed treatment, so the mark is allowed to run much larger */
+  .hero--drone, .hero--photo { --t-mark: clamp(3.75rem, 16.5vw, 15rem); }
+
+  /* Photo bed: full-bleed image, very slow scale, cool night grade. */
+  .hero--photo { height: 100svh; min-height: 100svh; isolation: isolate; }
+  .bed--photo {
+    z-index: 1; object-fit: cover; object-position: center 58%;
+    transform-origin: 52% 55%;
+  }
+  html.js .bed--photo { animation: kenburns 24s var(--ease) forwards; }
+  @keyframes kenburns { from { transform: scale(1.06); } to { transform: scale(1); } }
+  .hero--photo .photo-grade { z-index: 2; }
+  .hero--photo .hero-in { z-index: 3; }
+  .hero--photo .grain, .hero--photo .tag { z-index: 4; }
+  @media (prefers-reduced-motion: reduce) {
+    html.js .bed--photo { animation: none; transform: none; }
+  }
+  .hero--drone .hero-in { padding-block: var(--s4); }
+  .hero--drone .hero-mid { margin-block: auto; }
+  .hero--drone .lede { margin-top: var(--s4); }
+  .bed--far  { z-index: 0; }
+  .bed--near { z-index: 3; pointer-events: none; }
+  .hero--drone .hero-in { z-index: 2; }
+  .hero--drone .grain, .hero--drone .tag { z-index: 4; }
+
+  /* Per-letter entrance. One-shot, so keyframes are the right tool. */
+  /* letters are inline-blocks, so the line must be told not to wrap —
+     it bleeds past the container instead, which is the intent */
+  .mark-split .line { display: block; white-space: nowrap; }
+  .mark-split .ch { display: inline-block; will-change: auto; }
+  html.js .mark-split .ch {
+    opacity: 0;
+    transform: translateY(0.14em);
+    filter: blur(6px);
+    animation: chIn 620ms var(--ease) forwards;
+    animation-delay: calc(var(--i) * 55ms + 120ms);
+  }
+  @keyframes chIn {
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  html.js .lede--delay {
+    opacity: 0;
+    animation: fadeIn 700ms var(--ease) forwards;
+    animation-delay: 1000ms;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.js .mark-split .ch,
+    html.js .lede--delay { opacity: 1; transform: none; filter: none; animation: none; }
+  }
+  :global(html[data-still]) .mark-split .ch,
+  :global(html[data-still]) .lede--delay {
+    opacity: 1 !important; transform: none !important;
+    filter: none !important; animation: none !important;
+  }
+
+  /* B draws only rock; the sky it sits against is CSS, matching A. */
+  #drone-far {
+    background:
+      radial-gradient(55% 40% at 74% 16%, rgba(198,218,245,0.28), rgba(160,190,230,0) 70%),
+      linear-gradient(to bottom,
+        #04060D 0%, #080E1C 30%, #101B2E 55%, #18263C 74%, #22344C 100%);
+  }
+
+  /* The supplied photograph is bright daylight, not MASSIF's night shot, so
+     the grade has to do more work: a heavy scrim across the sky for the
+     wordmark to sit on, and enough desaturation that it reads as weather
+     rather than a postcard. The rock keeps its detail. */
+  .photo-grade {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(5,11,24,0.88) 0%,
+      rgba(5,11,24,0.66) 22%,
+      rgba(5,11,24,0.26) 44%,
+      rgba(5,11,24,0.22) 62%,
+      rgba(5,11,24,0.62) 84%,
+      rgba(5,11,24,0.92) 100%);
+  }
+  .bed--photo {
+    filter: saturate(0.62) contrast(1.06) brightness(0.86) hue-rotate(-6deg);
+  }
+
+  /* Fine grain so the gradients never band. */
+  .grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .hero-in {
+    position: relative; z-index: 2; width: 100%;
+    max-width: 74rem; margin-inline: auto; padding: var(--s6);
+    display: flex; flex-direction: column; justify-content: space-between; gap: var(--s12);
+  }
+  .rail { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s2);
+          border-bottom: 1px solid rgba(233,237,230,0.14); padding-bottom: var(--s3); }
+  .hero-mid { margin-block: auto; }
+  .kicker { display: block; margin-bottom: var(--s4); color: rgba(233,237,230,0.6); }
+  .bleed { max-width: none; margin-left: -0.06em; }
+  .lede { margin-top: var(--s6); font-size: var(--t-lead); color: rgba(233,237,230,0.75); }
+  .c-mark { mix-blend-mode: screen; }
+  .specbar { border-top-color: rgba(233,237,230,0.14); }
+
+  .tag {
+    position: absolute; z-index: 3; bottom: var(--s4); right: var(--s6);
+    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    text-transform: uppercase; background: var(--hivis); color: var(--hivis-ink);
+    padding: var(--s1) var(--s2);
+  }
+  .tag--warn { background: #E0A366; }
+
+  .note { padding: var(--s24) var(--s6); }
+  .note-in { max-width: 48rem; margin-inline: auto; }
+  .note-in .registry { display: block; margin-bottom: var(--s4); color: var(--fg-dim); }
+  .note-in h2 { font-size: var(--t-h2); letter-spacing: var(--tr-h2); margin-bottom: var(--s6); }
+  .note-in p + p { margin-top: var(--s4); }
+  .note-in p { color: var(--fg-dim); }
+  .note-in strong { color: var(--fg); font-weight: 600; }
+  .warn { border-left: 2px solid #C97B4A; padding-left: var(--s4); }
+
+  .foot { padding: var(--s8) var(--s6); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s8);
+          border-top: 1px solid var(--rule); }
+
+  @media (max-width: 640px) { .hero-in, .note, .foot { padding-inline: var(--s4); } }
+</style>
+
+<script>
+  import * as THREE from 'three';
+
+  // ?still=1 renders a single frame and starts no loops. Same code path the
+  // page uses for prefers-reduced-motion, so it also proves that fallback.
+  const still = new URLSearchParams(location.search).has('still');
+  const reduce = still || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- deterministic value noise (no deps, fixed seed) ---------- */
+  function makeNoise(seed: number) {
+    const hash = (n: number) => {
+      const s = Math.sin(n * 127.1 + seed * 311.7) * 43758.5453;
+      return s - Math.floor(s);
+    };
+    const smooth = (t: number) => t * t * (3 - 2 * t);
+    const val = (x: number) => {
+      const i = Math.floor(x), f = x - i;
+      return hash(i) * (1 - smooth(f)) + hash(i + 1) * smooth(f);
+    };
+    return (x: number, octaves = 5) => {
+      let sum = 0, amp = 0.5, freq = 1, norm = 0;
+      for (let o = 0; o < octaves; o++) {
+        sum += val(x * freq) * amp; norm += amp; amp *= 0.5; freq *= 2;
+      }
+      return sum / norm;
+    };
+  }
+
+  /* ---------- A + C: layered ridgelines on canvas 2D ---------- */
+  function ridge(canvas: HTMLCanvasElement, auto = false) {
+    const ctx = canvas.getContext('2d')!;
+    const LAYERS = 7;
+    const noises = Array.from({ length: LAYERS }, (_, i) => makeNoise(i * 7.3 + 1));
+    let w = 0, h = 0, scrollT = 0, raf = 0;
+
+    // MASSIF look: cold moonlit night rather than warm dawn. Blue-black sky,
+    // stars, snow catching light on the crests, black valley in front.
+    const SKY = [
+      [0.00, '#04060D'],
+      [0.30, '#080E1C'],
+      [0.55, '#101B2E'],
+      [0.74, '#18263C'],
+      [1.00, '#22344C'],
+    ] as const;
+    const ROCK_FAR  = [104, 124, 152];   // hazed by distance
+    const ROCK_NEAR = [10, 14, 22];      // near-black foreground
+    const SNOW      = [226, 236, 248];
+
+    // deterministic starfield, generated once
+    const starRnd = makeNoise(97.3);
+    const STARS = Array.from({ length: 260 }, (_, i) => ({
+      x: starRnd(i * 1.7, 1),
+      y: starRnd(i * 3.1 + 50, 1),
+      m: starRnd(i * 5.9 + 120, 1),
+    }));
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function draw() {
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      for (const [stop, col] of SKY) sky.addColorStop(stop, col);
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+      // stars, thinning towards the horizon
+      for (const st of STARS) {
+        const sx = st.x * w, sy = st.y * h * 0.62;
+        const fade = 1 - sy / (h * 0.62);
+        const a = (0.25 + st.m * 0.75) * (0.35 + fade * 0.65);
+        ctx.fillStyle = `rgba(226,236,248,${a.toFixed(3)})`;
+        ctx.fillRect(sx, sy, st.m > 0.86 ? 1.6 : 1, st.m > 0.86 ? 1.6 : 1);
+      }
+
+      // moon, high and cool, sitting off to one side
+      const moon = ctx.createRadialGradient(w * 0.74, h * 0.16, 0, w * 0.74, h * 0.16, h * 0.55);
+      moon.addColorStop(0, 'rgba(198,218,245,0.30)');
+      moon.addColorStop(0.35, 'rgba(160,190,230,0.10)');
+      moon.addColorStop(1, 'rgba(160,190,230,0)');
+      ctx.fillStyle = moon; ctx.fillRect(0, 0, w, h);
+
+      for (let L = 0; L < LAYERS; L++) {
+        const depth = L / (LAYERS - 1);          // 0 = far, 1 = near
+        const baseY = h * (0.44 + depth * 0.52);
+        const amp   = h * (0.17 + depth * 0.24);
+        const freq  = 1.4 + depth * 2.6;
+        const drift = scrollT * (0.04 + depth * 0.26) * w;
+
+        const pts: number[][] = [];
+        const step = 3;
+        for (let x = 0; x <= w; x += step) {
+          const v = noises[L]((x + drift) / (w / freq), 6);
+          // ridged multifractal: peaks, not dunes
+          const r = 1 - Math.abs(v * 2 - 1);
+          pts.push([x, baseY - r * r * amp * 1.6]);
+        }
+
+        const path = new Path2D();
+        path.moveTo(0, h);
+        for (const [x, y] of pts) path.lineTo(x, y);
+        path.lineTo(w, h); path.closePath();
+
+        // atmospheric perspective: far ranges wash out to cold blue
+        const t = depth;
+        const mix = (a: number, b: number) => Math.round(a * (1 - t) + b * t);
+        ctx.fillStyle = `rgb(${mix(ROCK_FAR[0], ROCK_NEAR[0])},${mix(ROCK_FAR[1], ROCK_NEAR[1])},${mix(ROCK_FAR[2], ROCK_NEAR[2])})`;
+        ctx.fill(path);
+
+        // Snow follows altitude, not the outline: only the stretches that rise
+        // above a snow line get it, so the crests break in and out of white.
+        if (depth < 0.82) {
+          const snowLine = baseY - amp * 0.62;
+          ctx.save();
+          ctx.clip(path);
+          ctx.lineWidth = 2.5 + (1 - depth) * 8;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.strokeStyle = `rgba(${SNOW[0]},${SNOW[1]},${SNOW[2]},${(0.72 - depth * 0.58).toFixed(3)})`;
+          let open = false;
+          for (const [x, y] of pts) {
+            if (y < snowLine) {
+              if (!open) { ctx.beginPath(); ctx.moveTo(x, y); open = true; }
+              else ctx.lineTo(x, y);
+            } else if (open) { ctx.stroke(); open = false; }
+          }
+          if (open) ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    function onScroll() {
+      const r = canvas.getBoundingClientRect();
+      // -1 .. 1 as the hero passes through the viewport
+      scrollT = (1 - (r.top + r.height) / (window.innerHeight + r.height)) * 2 - 1;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); });
+    }
+
+    window.addEventListener('resize', resize);
+    if (auto) {
+      // drifts on its own clock, so it can sit under a hero that isn't
+      // driven by scrolling at all
+      if (!reduce) {
+        let t0 = 0;
+        const tick = (ms: number) => { t0 = ms / 1000; scrollT = t0 * 0.012; draw(); requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+      }
+    } else if (!reduce) {
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+    resize();
+  }
+
+  /* ---------- B: endless drone flight ----------
+     Two layers with the name between them. The far range and sky are the
+     cheap canvas-2D ridge (same function as A, on an autonomous drift).
+     This is the near layer: terrain generated in the vertex shader from a
+     noise field that scrolls under a fixed camera, so the flight never
+     repeats. Fragments fade to alpha 0 with distance, which lets the far
+     range and the letters show through behind them. */
+  function drone(canvas: HTMLCanvasElement) {
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setClearAlpha(0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 1, 1, 1200);
+    camera.position.set(0, 96, 55);
+    camera.lookAt(0, 2, -175);
+
+    const geo = new THREE.PlaneGeometry(760, 900, 200, 260);
+    geo.rotateX(-Math.PI / 2);
+    geo.translate(0, 0, -400);
+
+    const uniforms = {
+      uOffset: { value: new THREE.Vector2(0, 0) },
+      uSun:    { value: new THREE.Vector3(0.48, 0.62, -0.62).normalize() },  // moon, high right
+      uRock:   { value: new THREE.Color('#333F56') },
+      uSnow:   { value: new THREE.Color('#E2ECF8') },
+      uHaze:   { value: new THREE.Color('#22344C') },
+      uNear:   { value: 90.0 },
+      uFar:    { value: 430.0 },
+    };
+
+    const mat = new THREE.ShaderMaterial({
+      uniforms,
+      transparent: true,
+      side: THREE.DoubleSide,
+      vertexShader: `
+        uniform vec2 uOffset;
+        varying vec3 vPos;
+        varying float vH;
+
+        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float vnoise(vec2 p){
+          vec2 i = floor(p), f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+                     mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+        }
+        float ridged(vec2 p){ float r = 1.0 - abs(vnoise(p) * 2.0 - 1.0); return r * r; }
+        float fbm(vec2 p){
+          float s = 0.0, a = 0.5, f = 1.0;
+          for (int i = 0; i < 5; i++) { s += ridged(p * f) * a; a *= 0.5; f *= 2.0; }
+          return s;
+        }
+
+        void main(){
+          vec3 p = position;
+          vec2 w = vec2(p.x, p.z) + uOffset;
+          float h = fbm(w * 0.0018) * 96.0;
+          // flatten a corridor under the flight path so the camera has air
+          h *= 0.30 + 0.70 * smoothstep(0.0, 190.0, abs(p.x));
+          p.y = h;
+          vH = h;
+          vPos = p;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision highp float;
+        uniform vec3 uSun, uRock, uSnow, uHaze;
+        uniform float uNear, uFar;
+        varying vec3 vPos;
+        varying float vH;
+
+        void main(){
+          // screen-space derivatives give flat-shaded facets for free
+          vec3 n = normalize(cross(dFdx(vPos), dFdy(vPos)));
+          if (n.y < 0.0) n = -n;
+
+          float lambert = clamp(dot(n, uSun), 0.0, 1.0);
+          vec3 col = uRock * (0.85 + 1.55 * lambert);
+
+          // snow catches the flatter, higher ground
+          // moonlight catches the higher, flatter ground as snow
+          float snow = smoothstep(30.0, 58.0, vH) * smoothstep(0.42, 0.86, n.y);
+          col = mix(col, uSnow, snow * 0.92);
+
+          // cool rim along the crests facing the moon
+          col += vec3(0.62, 0.74, 0.92) * pow(lambert, 8.0) * 0.30;
+
+          float d = distance(vPos, cameraPosition);
+          float haze = smoothstep(uNear, uFar, d);
+          col = mix(col, uHaze, haze * 0.75);
+
+          // fade out with distance so the far range and the name show through
+          float alpha = 1.0 - smoothstep(uNear * 1.15, uFar * 0.72, d);
+          if (alpha < 0.01) discard;
+          gl_FragColor = vec4(col, alpha);
+        }
+      `,
+    });
+
+    scene.add(new THREE.Mesh(geo, mat));
+
+    function resize() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    }
+
+    let running = false, raf = 0, t = 0;
+    function frame() {
+      if (!running) { raf = 0; return; }
+      t += 1 / 60;
+      // forward flight, with a slow weave so the ground never repeats
+      uniforms.uOffset.value.set(Math.sin(t * 0.06) * 220.0, -t * 46.0);
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(frame);
+    }
+
+    new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        running = e.isIntersecting && !reduce;
+        if (running && !raf) raf = requestAnimationFrame(frame);
+      });
+    }, { threshold: 0.01 }).observe(canvas);
+
+    window.addEventListener('resize', resize);
+    resize();   // one static frame, which is also the reduced-motion state
+  }
+
+  const a  = document.getElementById('ridge-a')   as HTMLCanvasElement | null;
+  const c  = document.getElementById('ridge-c')   as HTMLCanvasElement | null;
+  const bf = document.getElementById('drone-far')  as HTMLCanvasElement | null;
+  const bn = document.getElementById('drone-near') as HTMLCanvasElement | null;
+  if (a)  ridge(a);
+  if (c)  ridge(c);
+  if (bf) ridge(bf, true);   // far range + sky, autonomous drift
+  if (bn) drone(bn);         // near terrain, passes in front of the name
+</script>
+</body>
+</html>

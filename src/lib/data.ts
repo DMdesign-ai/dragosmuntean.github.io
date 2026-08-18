@@ -5,7 +5,7 @@ export const projects: Project[] = [
     id: 'warranty-claims',
     slug: 'warranty-claims-process-optimization',
     name: 'Warranty Claims',
-    description: 'Streamlined warranty claim UX with automated data validation — 230% faster processing',
+    description: 'Streamlined warranty claim UX with automated data validation, 2.3x faster processing',
     points: 2300,
     techTag: 'UX RESEARCH',
     icon: 'code',
@@ -112,7 +112,7 @@ export const aiBosses: AIBoss[] = [
 
 export const socialLinks: SocialLink[] = [
   { name: 'GITHUB', url: 'https://github.com/DMdesign-ai' },
-  { name: 'LINKEDIN', url: 'https://linkedin.com/in/dragosmuntean' },
+  { name: 'LINKEDIN', url: 'https://www.linkedin.com/in/dragos-muntean/' },
   { name: 'X', url: 'https://x.com/' },
   { name: 'STRAVA', url: 'https://strava.com/' },
 ];
