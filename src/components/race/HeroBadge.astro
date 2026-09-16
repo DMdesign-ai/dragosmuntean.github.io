@@ -1,0 +1,480 @@
+---
+/**
+ * Staff badge hung on the right side of the hero, over the photograph.
+ *
+ * A portrait ID card in the document's own faces and tokens, with a foil
+ * surface that follows the pointer: the card tilts toward it, drifts a few
+ * pixels, and the hologram brightens where the light falls. The pointer is
+ * read across the whole page, not only over the card, and every value eases
+ * toward its target each frame so the card never snaps.
+ *
+ * Hidden under 1024px, where the wordmark already owns the full width, and
+ * paused whenever the hero is scrolled out of view.
+ */
+interface Props {
+  name?: string;
+  org?: string;
+  role?: string;
+  /** Registry line under the role, e.g. "Product · Zurich CH". */
+  unit?: string;
+  since?: string;
+  status?: string;
+  /** Portrait, any path under public/. If the file is missing the image
+      removes itself and the monogram tile underneath shows instead. */
+  photo?: string;
+  initials?: string;
+}
+
+const {
+  name = 'Dragos Muntean',
+  org = 'TWINT',
+  role = 'UX Designer',
+  unit = 'Product · Zurich CH',
+  since = '2025',
+  status = 'Employed',
+  photo,
+  initials = 'DM',
+} = Astro.props;
+---
+
+<div class="hbadge" data-hbadge aria-label={`${org} staff badge, ${name}`} role="group">
+  <div class="hbadge__enter" data-hbadge-enter>
+    <div class="hbadge__target" data-hbadge-target>
+      <div class="hbadge__shadow" aria-hidden="true"></div>
+
+      <div class="hbadge__card" data-hbadge-card>
+        <div class="hbadge__surface" aria-hidden="true">
+          <div class="hbadge__colors"></div>
+          <div class="hbadge__grain"></div>
+          <div class="hbadge__sweep"></div>
+          <div class="hbadge__edge"></div>
+        </div>
+        <div class="hbadge__stripe" aria-hidden="true"></div>
+
+        <div class="hbadge__in">
+          <div class="hbadge__brand">
+            <span class="hbadge__org foil" data-foil={org}>{org}</span>
+            <span class="registry hbadge__pill"><i class="hbadge__dot" aria-hidden="true"></i>Staff</span>
+          </div>
+
+          <div class="hbadge__photo" aria-hidden="true">
+            <span class="hbadge__mono">{initials}</span>
+            {photo && (
+              <img src={photo} alt="" loading="lazy" decoding="async" onerror="this.remove()" />
+            )}
+          </div>
+
+          <div class="hbadge__person">
+            <span class="hbadge__name foil" data-foil={name}>{name}</span>
+            <span class="hbadge__role">{role}</span>
+            <span class="registry hbadge__unit">{unit}</span>
+          </div>
+
+          <dl class="hbadge__foot">
+            <div><dt>Since</dt><dd>{since}</dd></div>
+            <div><dt>Status</dt><dd class="is-now">{status}</dd></div>
+            <div class="hbadge__code" aria-hidden="true"></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── placement in the hero ──────────────────────────────── */
+  .hbadge {
+    position: absolute; z-index: 2;
+    right: var(--s6); top: 50%;
+    width: clamp(12.5rem, 15vw, 15rem);
+    transform: translateY(-50%);
+    perspective: 1100px;
+    /* the hero is overflow:hidden; keep the drift and shadow inside it */
+    padding: var(--s4);
+    margin: calc(var(--s4) * -1);
+  }
+  @media (max-width: 1023px), (max-height: 560px) { .hbadge { display: none; } }
+
+  /* ── entrance: dropped onto the page after the wordmark has landed ── */
+  .hbadge__enter { transform-style: preserve-3d; }
+  :global(html.js) .hbadge__enter {
+    opacity: 0;
+    animation: hbadgeEnter 1100ms var(--ease) 900ms forwards;
+  }
+  @keyframes hbadgeEnter {
+    from { opacity: 0; transform: translateY(-3rem) rotateX(-14deg) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .hbadge__target {
+    --rx: 0deg; --ry: 0deg; --tx: 0px; --ty: 0px; --scale: 1;
+    position: relative;
+    transform:
+      translate3d(var(--tx), var(--ty), 0)
+      rotateX(var(--rx)) rotateY(var(--ry))
+      scale(var(--scale));
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+  .hbadge__shadow {
+    position: absolute; inset: 6% 3% 0;
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.6);
+    filter: blur(20px);
+    transform: translate3d(calc(var(--tx) * -1.4), calc(var(--ty) * -1.4 + 16px), 0);
+    pointer-events: none;
+  }
+
+  /* ── the card ───────────────────────────────────────────── */
+  .hbadge__card {
+    /* 340 × 540 with a lanyard slot; white = card */
+    --mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 540' preserveAspectRatio='none'><path fill='%23fff' fill-rule='evenodd' d='M24 0H316A24 24 0 0 1 340 24V516A24 24 0 0 1 316 540H24A24 24 0 0 1 0 516V24A24 24 0 0 1 24 0Z M148 28H192A6 6 0 0 1 192 40H148A6 6 0 0 1 148 28Z'/></svg>");
+    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23g)'/></svg>");
+
+    /* live foil state, written by the pointer loop */
+    --rainbow-shift: 50%;
+    --rainbow-angle: 45deg;
+    --foil-active: 0;
+    --foil-x: 50%;
+    --foil-y: 50%;
+    --band-x: 50%;
+    --band-y: 50%;
+
+    --rainbow: linear-gradient(var(--rainbow-angle),
+      #ff8f8f 0%, #ffd08a 14%, #c8ff8f 28%, #8fffd4 43%,
+      #8fb8ff 57%, #d48fff 71%, #ff8fd8 86%, #ff8f8f 100%);
+
+    position: relative;
+    width: 100%;
+    aspect-ratio: 340 / 540;
+    isolation: isolate;
+    container-type: inline-size;
+    background: linear-gradient(170deg, var(--night-raise), #050605);
+    -webkit-mask: var(--mask) center / 100% 100% no-repeat;
+            mask: var(--mask) center / 100% 100% no-repeat;
+    transform: translateZ(0);
+    user-select: none;
+  }
+
+  .hbadge__surface { position: absolute; inset: 0; pointer-events: none; }
+  .hbadge__surface > * { position: absolute; inset: 0; }
+
+  /* hologram, restrained: it lives only where the light is */
+  .hbadge__colors {
+    background: var(--rainbow);
+    background-size: 150% 150%;
+    background-position: var(--rainbow-shift) 50%;
+    opacity: calc(0.06 + 0.34 * var(--foil-active));
+    mix-blend-mode: screen;
+    -webkit-mask-image: radial-gradient(60% 45% at var(--foil-x) var(--foil-y),
+      #000 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+            mask-image: radial-gradient(60% 45% at var(--foil-x) var(--foil-y),
+      #000 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  }
+  .hbadge__grain {
+    background:
+      repeating-linear-gradient(calc(var(--rainbow-angle) + 90deg),
+        rgba(255,255,255,0.05) 0 1px, transparent 1px 3px),
+      var(--grain);
+    background-size: 100% 100%, 240px 240px;
+    background-position: var(--foil-x) var(--foil-y), 0 0;
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+  }
+  .hbadge__sweep {
+    background: linear-gradient(var(--rainbow-angle),
+      transparent 38%, rgba(255,255,255,0.14) 48%, rgba(255,255,255,0.24) 50%,
+      rgba(255,255,255,0.14) 52%, transparent 62%);
+    background-size: 220% 220%;
+    background-position: var(--band-x) var(--band-y);
+    mix-blend-mode: soft-light;
+    opacity: calc(0.3 + 0.7 * var(--foil-active));
+  }
+  /* one-time light sweep once the card has landed */
+  :global(html.js) .hbadge__sweep::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,0.45) 50%, transparent 62%);
+    background-size: 300% 100%;
+    background-position: 120% 0;
+    animation: hbadgeSweep 1500ms cubic-bezier(0.4, 0, 0.2, 1) 1500ms both;
+  }
+  @keyframes hbadgeSweep { from { background-position: 120% 0; } to { background-position: -20% 0; } }
+
+  .hbadge__edge {
+    background: radial-gradient(90% 90% at var(--foil-x) var(--foil-y),
+      rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.26) 45%, rgba(255,255,255,0.08) 100%);
+    -webkit-mask:
+      var(--mask) center / 100% 100% no-repeat,
+      var(--mask) center / calc(100% - 3px) calc(100% - 3px) no-repeat;
+    -webkit-mask-composite: xor;
+            mask:
+      var(--mask) center / 100% 100% no-repeat,
+      var(--mask) center / calc(100% - 3px) calc(100% - 3px) no-repeat;
+            mask-composite: exclude;
+  }
+
+  /* security stripe down the right edge */
+  .hbadge__stripe {
+    position: absolute; top: 14%; bottom: 8%; right: 6.5%; width: 3.2%;
+    border-radius: 999px;
+    background: var(--rainbow);
+    background-size: 100% 400%;
+    background-position: 50% var(--foil-y);
+    opacity: calc(0.4 + 0.6 * var(--foil-active));
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  /* ── content, in the document's own faces ───────────────── */
+  .hbadge__in {
+    position: absolute; inset: 0;
+    display: grid; grid-template-rows: auto auto 1fr auto;
+    gap: 5cqw;
+    padding: 12% 15% 8% 9%;
+  }
+  .hbadge__brand { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); }
+  .hbadge__org {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: 8.6cqw; line-height: 1; letter-spacing: -0.01em;
+  }
+  .hbadge__pill {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    border: 1px solid rgba(233,237,230,0.22); border-radius: 999px;
+    padding: 0.3em 0.7em; color: var(--fg-dim);
+  }
+  .hbadge__dot {
+    width: 0.45em; height: 0.45em; border-radius: 50%;
+    background: var(--hivis);
+  }
+
+  .hbadge__photo {
+    width: 40cqw; aspect-ratio: 1; border-radius: 6cqw; overflow: hidden;
+    display: grid; place-items: center;
+    background: var(--raise);
+    box-shadow: 0 0 0 1px var(--img-edge), inset 0 0 0 1px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  /* the portrait sits over the monogram; a square crop keeps the face,
+     which is in the upper third of the source photograph */
+  .hbadge__photo img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 30%; display: block;
+  }
+  .hbadge__mono {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: 13cqw; letter-spacing: var(--tr-h1); color: var(--fg-dim);
+  }
+  .hbadge__photo::after {
+    content: ""; position: absolute; inset: 0;
+    background: var(--rainbow);
+    background-size: 200% 200%;
+    background-position: var(--rainbow-shift) 50%;
+    mix-blend-mode: overlay;
+    opacity: calc(0.15 * var(--foil-active));
+    pointer-events: none;
+  }
+
+  .hbadge__person { display: grid; align-content: end; gap: 1.2cqw; }
+  .hbadge__name {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: 9cqw; line-height: 1.05; letter-spacing: var(--tr-h1);
+    text-wrap: balance;
+  }
+  .hbadge__role { font-family: var(--f-read); font-size: var(--t-12); font-weight: 500; color: var(--fg-dim); }
+  .hbadge__unit { margin-top: 0.5cqw; }
+
+  .hbadge__foot {
+    display: grid; grid-template-columns: auto auto 1fr; align-items: end; gap: var(--s3);
+    margin: 0; padding-top: 3.5cqw;
+    border-top: 1px solid rgba(233,237,230,0.16);
+  }
+  .hbadge__foot dt {
+    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    text-transform: uppercase; color: var(--fg-faint);
+  }
+  .hbadge__foot dd {
+    margin: 0.2em 0 0; font-family: var(--f-mono); font-size: var(--t-11);
+    font-variant-numeric: tabular-nums; color: var(--fg);
+  }
+  .hbadge__foot dd.is-now { color: var(--hivis); }
+  .hbadge__code {
+    justify-self: end; width: 18cqw; height: 6cqw; opacity: 0.7;
+    background: repeating-linear-gradient(90deg,
+      var(--fg-dim) 0 1px, transparent 1px 3px,
+      var(--fg-dim) 3px 5px, transparent 5px 6px,
+      var(--fg-dim) 6px 7px, transparent 7px 10px,
+      var(--fg-dim) 10px 13px, transparent 13px 14px);
+  }
+
+  /* foil text: mist at rest, hologram where the light lands */
+  .foil {
+    position: relative; width: max-content; max-width: 100%;
+    color: transparent;
+    background: linear-gradient(180deg, var(--fg) 0%, var(--fg-dim) 100%);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .foil::after {
+    content: attr(data-foil);
+    position: absolute; inset: 0;
+    color: transparent;
+    background: var(--rainbow);
+    background-size: 300% 300%;
+    background-position: var(--rainbow-shift) 50%;
+    -webkit-background-clip: text; background-clip: text;
+    opacity: calc(0.85 * var(--foil-active));
+    -webkit-mask-image: radial-gradient(120% 160% at var(--foil-x) var(--foil-y),
+      #000 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+            mask-image: radial-gradient(120% 160% at var(--foil-x) var(--foil-y),
+      #000 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .hbadge__enter { opacity: 1; animation: none; }
+    :global(html.js) .hbadge__sweep::after { animation: none; }
+  }
+</style>
+
+<script>
+  const root     = document.querySelector<HTMLElement>('[data-hbadge]');
+  const entrance = root?.querySelector<HTMLElement>('[data-hbadge-enter]');
+  const target   = root?.querySelector<HTMLElement>('[data-hbadge-target]');
+  const card     = root?.querySelector<HTMLElement>('[data-hbadge-card]');
+
+  if (root && entrance && target && card) {
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const MAX_TILT   = reduceMotion ? 0 : 11;   // deg at the card's edge
+    const MAX_SHIFT  = reduceMotion ? 0 : 6;    // px the card drifts toward the pointer
+    const HOVER_ZOOM = reduceMotion ? 1 : 1.02;
+    const SPEED      = 10;                      // higher = snappier follow
+
+    // Linear inside the card so the light sits under the cursor, then eases
+    // to a hard cap of ±1.25 however far away the pointer goes.
+    const soft = (v: number) => {
+      const a = Math.abs(v);
+      const s = a <= 1 ? a : 1 + 0.25 * (1 - Math.exp(-(a - 1) * 1.5));
+      return Math.sign(v) * s;
+    };
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    type State = Record<'rx' | 'ry' | 'tx' | 'ty' | 'fx' | 'fy' | 'bx' | 'by' | 'shift' | 'ax' | 'ay' | 'active' | 'scale', number>;
+    const rest: State = { rx: 0, ry: 0, tx: 0, ty: 0, fx: 50, fy: 50, bx: 50, by: 50,
+                          shift: 50, ax: 0.7, ay: 0.7, active: 0.35, scale: 1 };
+    const cur: State = { ...rest, active: 0 };
+    const tgt: State = { ...rest };
+
+    let pointerLive = false;
+    let lastInput = 0;
+
+    function aim(dx: number, dy: number) {
+      const inside = Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+      const sx = soft(dx), sy = soft(dy);
+      tgt.ry = sx * MAX_TILT;
+      tgt.rx = -sy * MAX_TILT;
+      tgt.tx = sx * MAX_SHIFT;
+      tgt.ty = sy * MAX_SHIFT;
+      tgt.fx = 50 + sx * 50;
+      tgt.fy = 50 + sy * 50;
+      tgt.bx = 50 + sx * 90;
+      tgt.by = 50 + sy * 90;
+      tgt.shift = 50 + sx * 38 - sy * 16;
+      const len = Math.hypot(dx, dy) || 1;
+      tgt.ax = dx / len; tgt.ay = dy / len;
+      tgt.active = inside ? 1 : 0.6;
+      tgt.scale = inside ? HOVER_ZOOM : 1;
+      pointerLive = true;
+      lastInput = performance.now();
+    }
+
+    // Measure the untransformed wrapper, never the tilting card: measuring
+    // the card would feed its own motion back into the next frame.
+    let box: DOMRect | null = null;
+    const measure = () => { box = entrance.getBoundingClientRect(); };
+    addEventListener('resize', measure);
+    addEventListener('scroll', measure, { passive: true });
+
+    function aimAt(x: number, y: number) {
+      if (!box) measure();
+      const b = box!;
+      aim((x - (b.left + b.width / 2)) / (b.width / 2),
+          (y - (b.top + b.height / 2)) / (b.height / 2));
+    }
+    const release = () => { pointerLive = false; };
+
+    addEventListener('pointermove', (e) => aimAt(e.clientX, e.clientY), { passive: true });
+    addEventListener('pointerdown', (e) => aimAt(e.clientX, e.clientY), { passive: true });
+    addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') release(); }, { passive: true });
+    addEventListener('pointercancel', release);
+    addEventListener('blur', release);
+    document.addEventListener('mouseleave', release);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
+
+    // Only spend frames while the hero is on screen.
+    let visible = true;
+    let running = false;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        visible = entries.some((e) => e.isIntersecting);
+        if (visible && started && !running) { prev = performance.now(); running = true; requestAnimationFrame(frame); }
+      }, { threshold: 0.05 }).observe(root);
+    }
+
+    let prev = performance.now();
+    let started = false;
+    function frame(now: number) {
+      if (!visible) { running = false; return; }
+      const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+      const k = 1 - Math.exp(-dt * SPEED);
+
+      const live = pointerLive || now - lastInput < 400;
+      if (!live) {
+        // ambient: a slow light drift so the foil never looks dead
+        const t = now / 1000;
+        tgt.rx = reduceMotion ? 0 : Math.sin(t * 0.45) * 1.6;
+        tgt.ry = reduceMotion ? 0 : Math.cos(t * 0.38) * 2.2;
+        tgt.tx = 0; tgt.ty = 0;
+        tgt.fx = 50 + Math.sin(t * 0.5) * 28;
+        tgt.fy = 50 + Math.cos(t * 0.37) * 22;
+        tgt.bx = 50 + Math.sin(t * 0.5) * 60;
+        tgt.by = 50 + Math.cos(t * 0.37) * 40;
+        tgt.shift = 50 + Math.sin(t * 0.3) * 22;
+        tgt.ax = Math.cos(t * 0.25); tgt.ay = Math.sin(t * 0.25);
+        tgt.active = 0.35;
+        tgt.scale = 1;
+      }
+
+      for (const key of Object.keys(cur) as (keyof State)[]) cur[key] = lerp(cur[key], tgt[key], k);
+
+      const angle = Math.atan2(cur.ay, cur.ax) * 180 / Math.PI + 90;
+      const s = target.style;
+      s.setProperty('--rx', cur.rx.toFixed(2) + 'deg');
+      s.setProperty('--ry', cur.ry.toFixed(2) + 'deg');
+      s.setProperty('--tx', cur.tx.toFixed(2) + 'px');
+      s.setProperty('--ty', cur.ty.toFixed(2) + 'px');
+      s.setProperty('--scale', cur.scale.toFixed(4));
+
+      const f = card.style;
+      f.setProperty('--foil-x', cur.fx.toFixed(2) + '%');
+      f.setProperty('--foil-y', cur.fy.toFixed(2) + '%');
+      f.setProperty('--band-x', cur.bx.toFixed(2) + '%');
+      f.setProperty('--band-y', cur.by.toFixed(2) + '%');
+      f.setProperty('--rainbow-shift', cur.shift.toFixed(2) + '%');
+      f.setProperty('--rainbow-angle', angle.toFixed(2) + 'deg');
+      f.setProperty('--foil-active', cur.active.toFixed(3));
+
+      requestAnimationFrame(frame);
+    }
+
+    const start = () => {
+      if (started) return;
+      started = true; measure();
+      if (visible) { prev = performance.now(); running = true; requestAnimationFrame(frame); }
+    };
+    // wait for the entrance to land so the tilt does not fight it
+    if (reduceMotion) start();
+    else entrance.addEventListener('animationend', start, { once: true });
+    setTimeout(start, 2200);
+  }
+</script>
