@@ -49,7 +49,9 @@ const fmt = (d: Date) =>
       { k: 'Status',  v: 'Building', now: true },
     ]}
   >
-    <HeroBadge slot="aside" />
+    {/* Portrait lives at public/images/portrait/dragos.webp; until it is
+        added the badge shows the DM monogram. */}
+    <HeroBadge slot="aside" photo="/images/portrait/dragos.webp" />
   </HeroPhoto>
 
   <!-- ── selected work ────────────────────────────────── -->

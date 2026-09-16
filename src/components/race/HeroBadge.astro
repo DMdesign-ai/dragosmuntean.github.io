@@ -19,7 +19,8 @@ interface Props {
   unit?: string;
   since?: string;
   status?: string;
-  /** Portrait, any path under public/. Without one the monogram tile shows. */
+  /** Portrait, any path under public/. If the file is missing the image
+      removes itself and the monogram tile underneath shows instead. */
   photo?: string;
   initials?: string;
 }
@@ -56,10 +57,11 @@ const {
             <span class="registry hbadge__pill"><i class="hbadge__dot" aria-hidden="true"></i>Staff</span>
           </div>
 
-          <div class="hbadge__photo" aria-hidden={photo ? undefined : 'true'}>
-            {photo
-              ? <img src={photo} alt="" loading="lazy" decoding="async" />
-              : <span class="hbadge__mono">{initials}</span>}
+          <div class="hbadge__photo" aria-hidden="true">
+            <span class="hbadge__mono">{initials}</span>
+            {photo && (
+              <img src={photo} alt="" loading="lazy" decoding="async" onerror="this.remove()" />
+            )}
           </div>
 
           <div class="hbadge__person">
@@ -253,7 +255,12 @@ const {
     box-shadow: 0 0 0 1px var(--img-edge), inset 0 0 0 1px rgba(0,0,0,0.6);
     position: relative;
   }
-  .hbadge__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* the portrait sits over the monogram; a square crop keeps the face,
+     which is in the upper third of the source photograph */
+  .hbadge__photo img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 30%; display: block;
+  }
   .hbadge__mono {
     font-family: var(--f-display); font-weight: 600;
     font-size: 13cqw; letter-spacing: var(--tr-h1); color: var(--fg-dim);
