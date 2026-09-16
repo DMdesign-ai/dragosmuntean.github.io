@@ -1,6 +1,7 @@
 ---
 import RaceLayout from '../layouts/RaceLayout.astro';
 import HeroPhoto from '../components/race/HeroPhoto.astro';
+import HeroBadge from '../components/race/HeroBadge.astro';
 import { getCollection } from 'astro:content';
 import { shiplog, byDateDesc } from '../lib/shiplog';
 import { previewImage } from '../lib/preview';
@@ -47,7 +48,9 @@ const fmt = (d: Date) =>
       { k: 'Since',   v: '2008' },
       { k: 'Status',  v: 'Building', now: true },
     ]}
-  />
+  >
+    <HeroBadge slot="aside" />
+  </HeroPhoto>
 
   <!-- ── selected work ────────────────────────────────── -->
   <section class="band on-snow">

@@ -33,9 +33,14 @@ const {
 
 const NAME1 = 'DRAGOS'.split('');
 const NAME2 = 'MUNTEAN'.split('');
+
+/* Something is hung over the photograph on the right (the staff badge on the
+   home page). The wordmark then gives up a little size so its last letter
+   does not run under it. */
+const hasAside = Astro.slots.has('aside');
 ---
 
-<section class="phero on-night">
+<section class:list={['phero', 'on-night', { 'phero--aside': hasAside }]}>
   <Picture
     class="phero__bed"
     src={ridge}
@@ -80,6 +85,9 @@ const NAME2 = 'MUNTEAN'.split('');
     </dl>
   </div>
 
+  <!-- Anything hung over the photograph: the staff badge on the home page. -->
+  <slot name="aside" />
+
   <div class="phero__grain" aria-hidden="true"></div>
 </section>
 
@@ -92,6 +100,12 @@ const NAME2 = 'MUNTEAN'.split('');
     min-height: calc(100svh - var(--header-h));
     overflow: hidden; isolation: isolate;
     --t-mark: clamp(3.5rem, 16.5vw, 15rem);
+  }
+  /* With the badge on the right (it shows from 1024px up), MUNTEAN at the
+     full size ends under it at 1440. 14.5vw clears the badge by 30px at the
+     tightest width and grows back to a comfortable gap either side. */
+  @media (min-width: 1024px) {
+    .phero--aside { --t-mark: clamp(3.5rem, 14.5vw, 13.5rem); }
   }
 
   .phero__bed {
