@@ -1,0 +1,8 @@
+Hero terrain: public/hero/eiger-height.png
+
+Derived from swissALTI3D (Federal Office of Topography swisstopo),
+2024 and 2025 survey tiles, 2 m grid, LV95 2638-2648 E / 1153-1163 N.
+Mosaicked and resampled to 768 x 768 (about 13 m per sample).
+
+Free geodata of swisstopo (OGD). Source: © swisstopo
+https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices

@@ -49,12 +49,18 @@ const NAME2 = 'MUNTEAN'.split('');
     loading="eager"
     fetchpriority="high"
   />
+  <!-- 3D Eiger. The photograph above stays as the poster and the fallback:
+       the canvas only fades in once the scene has drawn its first frame. -->
+  <canvas class="phero__3d" aria-hidden="true"></canvas>
   <div class="phero__grade" aria-hidden="true"></div>
 
   <div class="phero__in">
     <div class="phero__rail">
       <span class="registry">{doc}</span>
-      <span class="registry">{meta}</span>
+      <span class="phero__railend">
+        <span class="registry">{meta}</span>
+        <button class="registry phero__pause" type="button" hidden>Pause flight</button>
+      </span>
     </div>
 
     <div class="phero__mid">
@@ -82,6 +88,46 @@ const NAME2 = 'MUNTEAN'.split('');
 
   <div class="phero__grain" aria-hidden="true"></div>
 </section>
+
+<script>
+  /* Loads three.js and the terrain only after the page has settled, and only
+     where it can run well. Everything else keeps the photograph. */
+  const hero = document.querySelector<HTMLElement>('.phero');
+  const canvas = hero?.querySelector<HTMLCanvasElement>('.phero__3d');
+  const pause = hero?.querySelector<HTMLButtonElement>('.phero__pause');
+
+  const conn = (navigator as any).connection;
+  const lowEnd =
+    conn?.saveData === true ||
+    /(^|-)2g$/.test(conn?.effectiveType ?? '') ||
+    ((navigator as any).deviceMemory ?? 8) <= 2 ||
+    (navigator.hardwareConcurrency ?? 8) <= 2;
+  const hasWebGL2 = (() => {
+    try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; }
+  })();
+
+  if (hero && canvas && pause && hasWebGL2 && !lowEnd) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start = async () => {
+      try {
+        const { createEiger } = await import('../../lib/hero/eigerScene');
+        const scene = await createEiger({
+          canvas, host: hero, heightUrl: '/hero/eiger-height.png', autoplay: !reduced,
+        });
+        hero.classList.add('is-3d');
+        pause.hidden = false;
+        const label = () => { pause.textContent = scene.playing ? 'Pause flight' : 'Resume flight'; };
+        label();
+        pause.addEventListener('click', () => { scene.setPlaying(!scene.playing); label(); });
+      } catch (err) {
+        console.warn('Hero 3D skipped, keeping the photograph.', err);
+      }
+    };
+    const idle = (window as any).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 200));
+    if (document.readyState === 'complete') idle(start, { timeout: 2000 });
+    else addEventListener('load', () => idle(start, { timeout: 2000 }), { once: true });
+  }
+</script>
 
 <style>
   .phero {
@@ -111,6 +157,34 @@ const NAME2 = 'MUNTEAN'.split('');
      failed too (2.90 and 3.69 against a 4.5 floor).
      These values put the worst case at 4.44 / 5.58 / 5.21. Re-measure if the
      photograph is ever swapped: a brighter image needs a heavier scrim. */
+  /* Same grade as the photograph, one step darker: the rendered snow runs
+     brighter than the photo's, and at brightness 0.86 text contrast measured
+     about 6% below the photo hero. 0.80 brings it back level. Re-measure if
+     the scene colours change. */
+  .phero__3d {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; display: block;
+    opacity: 0; transition: opacity 1400ms var(--ease);
+    filter: saturate(0.62) contrast(1.06) brightness(0.80) hue-rotate(-6deg);
+  }
+  .phero.is-3d .phero__3d { opacity: 1; }
+  /* Drag anywhere on the hero rotates the view. Vertical swipes still
+     scroll the page on touch, and the wheel is never captured. */
+  .phero.is-3d { cursor: grab; touch-action: pan-y; }
+  .phero.is-3d.is-dragging { cursor: grabbing; }
+  .phero.is-3d .phero__in { pointer-events: none; }
+  .phero.is-3d .phero__pause { pointer-events: auto; }
+  .phero.is-dragging .phero__in { user-select: none; }
+
+  .phero__railend { display: inline-flex; gap: var(--s4); align-items: baseline; }
+  .phero__pause {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: rgba(233,237,230,0.66);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .phero__pause:hover { color: rgba(233,237,230,0.92); }
+  .phero__pause:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
+
   .phero__grade {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: linear-gradient(to bottom,
