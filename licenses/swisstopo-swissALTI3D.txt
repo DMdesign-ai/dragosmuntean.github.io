@@ -1,8 +1,13 @@
-Hero terrain: public/hero/eiger-height.png
+Hero scene data: public/hero/
 
-Derived from swissALTI3D (Federal Office of Topography swisstopo),
-2024 and 2025 survey tiles, 2 m grid, LV95 2638-2648 E / 1153-1163 N.
-Mosaicked and resampled to 768 x 768 (about 13 m per sample).
+Terrain (base-height.webp, detail-height.webp) and baked lighting
+(base-light.webp, detail-light.webp) are derived from swissALTI3D
+(Federal Office of Topography swisstopo), 2024 and 2025 survey tiles,
+2 m grid, LV95 2638-2648 E / 1153-1163 N. Base resampled to ~20 m,
+detail (2640.5-2645.0 E / 1157.8-1161.8 N) to 4 m.
+
+Route (trail.json, trail-mask.png) is the "Eigertrail" path from
+swissTLM3D (swisstopo), Eigergletscher to Alpiglen, 5.9 km.
 
 Free geodata of swisstopo (OGD). Source: © swisstopo
 https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices

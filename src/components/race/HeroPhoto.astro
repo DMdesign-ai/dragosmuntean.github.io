@@ -111,8 +111,9 @@ const NAME2 = 'MUNTEAN'.split('');
     const start = async () => {
       try {
         const { createEiger } = await import('../../lib/hero/eigerScene');
+        const small = matchMedia('(max-width: 820px), (pointer: coarse)').matches;
         const scene = await createEiger({
-          canvas, host: hero, heightUrl: '/hero/eiger-height.png', autoplay: !reduced,
+          canvas, host: hero, assetBase: '/hero/', autoplay: !reduced, lowPower: small,
         });
         hero.classList.add('is-3d');
         pause.hidden = false;
@@ -194,6 +195,21 @@ const NAME2 = 'MUNTEAN'.split('');
       rgba(5,11,24,0.54) 60%,
       rgba(5,11,24,0.72) 78%,
       rgba(5,11,24,0.94) 100%);
+  }
+
+  /* With the 3D scene on, the scrim opens a little around the runner, which
+     the scene frames at 72% / 80% (portrait: 50% / 64%, see eigerScene.ts).
+     That spot sits clear of the wordmark, lede and spec bar. Text contrast
+     was re-measured with the scrim open; re-check if either position moves. */
+  .phero.is-3d .phero__grade {
+    -webkit-mask-image: radial-gradient(ellipse 24% 20% at 72% 78%, rgba(0,0,0,.38) 0%, rgba(0,0,0,.6) 55%, #000 100%);
+            mask-image: radial-gradient(ellipse 24% 20% at 72% 78%, rgba(0,0,0,.38) 0%, rgba(0,0,0,.6) 55%, #000 100%);
+  }
+  @media (max-aspect-ratio: 4/5) {
+    .phero.is-3d .phero__grade {
+      -webkit-mask-image: radial-gradient(ellipse 42% 9% at 50% 64%, rgba(0,0,0,.4) 0%, rgba(0,0,0,.62) 55%, #000 100%);
+              mask-image: radial-gradient(ellipse 42% 9% at 50% 64%, rgba(0,0,0,.4) 0%, rgba(0,0,0,.62) 55%, #000 100%);
+    }
   }
 
   .phero__grain {
