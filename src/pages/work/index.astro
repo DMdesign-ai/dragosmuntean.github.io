@@ -12,10 +12,10 @@ const fmt = (d: Date) =>
   d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
 ---
 
-<RaceLayout title="Work — Dragos Muntean" ground="snow" doc="DOC RD-04 / WORK">
+<RaceLayout title="Work — Dragos Muntean" ground="snow" doc="DOC RD-01 / WORK">
 
   <section class="band on-snow head">
-    <span class="registry">04 / Work</span>
+    <span class="registry">01 / Work</span>
     <h1>Work</h1>
     <p class="lede">
       Newest first. Current work at TWINT is under NDA and appears as a withheld entry —
@@ -81,7 +81,11 @@ const fmt = (d: Date) =>
 
   .rows { border-bottom: 1px solid var(--rule); }
 
-  .entry { border: 1px solid var(--rule); padding: var(--s8); background: var(--raise); }
+  /* The withheld entry keeps its spec-sheet structure but not its weight.
+     Filled and bordered, it outranked the three case studies below it, so the
+     work that cannot be shown drew the eye before the work that can. It now
+     sits on the same hairlines as every other row. */
+  .entry { border-block: 1px solid var(--rule); padding-block: var(--s8); }
   .entry-head { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s6); flex-wrap: wrap; }
   .entry-head h2 { font-size: var(--t-h3); letter-spacing: -0.015em; }
   .entry-note { font-size: var(--t-14); color: var(--fg-dim); margin-top: var(--s6); }
