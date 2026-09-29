@@ -175,6 +175,14 @@ body {
   text-wrap: pretty;          /* avoid orphans in body copy */
 }
 
+/* Footer sits on the bottom edge even when a page is shorter than the
+   screen: main takes up whatever height the header and footer leave. */
+body:has(> .docfoot) {
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+}
+body:has(> .docfoot) > main { flex: 1 0 auto; }
+
 h1, h2, h3, h4 {
   font-family: var(--f-display);
   font-weight: 600;
