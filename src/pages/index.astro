@@ -2,7 +2,7 @@
 import RaceLayout from '../layouts/RaceLayout.astro';
 import HeroPhoto from '../components/race/HeroPhoto.astro';
 import { getCollection } from 'astro:content';
-import { shiplog, byDateDesc } from '../lib/shiplog';
+import { monthYear } from '../lib/date';
 import { previewImage } from '../lib/preview';
 import LogRow from '../components/race/LogRow.astro';
 
@@ -15,22 +15,16 @@ const notes = (await getCollection('blog'))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const latestNotes = notes.slice(0, 3);
 
-const labs = await getCollection('labs');
+/* Same source, order and wording as /labs. The strip used to read a
+   hand-kept list, which drifted: different names, figures, and a different
+   entry at 001 than the Labs page. */
+const labs = (await getCollection('labs'))
+  .filter((l) => !l.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const recentLabs = labs.slice(0, 6);
 
-/* Preview image per shiplog entry, matched by href to whatever collection
-   the entry points at. Entries with no image simply don't get a preview. */
-const byHref = new Map<string, string>();
-for (const p of projects) byHref.set(`/work/${p.id}/`, previewImage(p) ?? '');
-for (const n of notes)    byHref.set(`/notes/${n.id}/`, previewImage(n) ?? '');
-for (const l of labs)     byHref.set(`/labs/${l.id}/`, previewImage(l) ?? '');
-
-/* Labs only. The strip used to be the whole log, which put Agent 2 UI here
-   and again in Field notes below, and made "everything" the only honest
-   title for it. */
-const recent = shiplog.filter((e) => e.kind === 'lab').sort(byDateDesc).slice(0, 6);
-
-const fmt = (d: Date) =>
-  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
+/* Everything the site lists: TWINT, the On projects, labs, notes. */
+const entries = 1 + projects.length + labs.length + notes.length;
 ---
 
 <RaceLayout title="Dragos Muntean — design technologist" doc="DOC RD-00 / INDEX">
@@ -43,7 +37,7 @@ const fmt = (d: Date) =>
     spec={[
       { k: 'Base',    v: 'Zurich CH' },
       { k: 'Now',     v: 'TWINT' },
-      { k: 'Entries', v: String(shiplog.length) },
+      { k: 'Entries', v: String(entries) },
       { k: 'Since',   v: '2008' },
       { k: 'Status',  v: 'Building', now: true },
     ]}
@@ -56,30 +50,30 @@ const fmt = (d: Date) =>
       <h2>Work, and what changed because of it</h2>
     </header>
 
-    <div class="rows">
+    <ol class="rows" role="list">
       {/* Current role leads the timeline — it is the most recent entry. */}
-      <LogRow
+      <li><LogRow
         n={'001'}
         title="TWINT"
         meta="Product designer · Swiss payments · 2025 —"
         tag="Under NDA"
         stagger={0}
         reveal
-      />
+      /></li>
 
       {projects.map((p, i) => (
-        <LogRow
+        <li><LogRow
           n={String(i + 2).padStart(3, '0')}
           title={p.data.title}
-          meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
+          meta={`${p.data.company} · ${p.data.role} · ${monthYear(p.data.date)}`}
           href={`/work/${p.id}/`}
           figure={p.data.figure ?? 'Case study'}
           image={previewImage(p)}
           stagger={i + 1}
           reveal
-        />
+        /></li>
       ))}
-    </div>
+    </ol>
   </section>
 
   <!-- ── ship log ─────────────────────────────────────── -->
@@ -93,20 +87,20 @@ const fmt = (d: Date) =>
       </p>
     </header>
 
-    <div class="rows">
-      {recent.map((e, i) => (
-        <LogRow
+    <ol class="rows" role="list">
+      {recentLabs.map((l, i) => (
+        <li><LogRow
           n={String(i + 1).padStart(3, '0')}
-          title={e.title}
-          meta={e.meta}
-          href={e.href}
-          figure={e.figure}
-          image={e.href ? byHref.get(e.href) || null : null}
+          title={l.data.title}
+          meta={`${l.data.stack.slice(0, 3).join(' · ')} · ${monthYear(l.data.date)}`}
+          href={`/labs/${l.id}/`}
+          figure={l.data.figure ?? l.data.status}
+          image={previewImage(l)}
           stagger={i}
           reveal
-        />
+        /></li>
       ))}
-    </div>
+    </ol>
   </section>
 
   <!-- ── notes ────────────────────────────────────────── -->
@@ -119,20 +113,20 @@ const fmt = (d: Date) =>
       </p>
     </header>
 
-    <div class="rows">
+    <ol class="rows" role="list">
       {latestNotes.map((n, i) => (
-        <LogRow
+        <li><LogRow
           n={String(i + 1).padStart(3, '0')}
           title={n.data.title}
           meta={[n.data.platform, ...n.data.tags.slice(0, 3)].filter(Boolean).join(' · ')}
           href={`/notes/${n.id}/`}
-          figure={fmt(n.data.date)}
+          figure={monthYear(n.data.date).toUpperCase()}
           image={previewImage(n)}
           stagger={i}
           reveal
-        />
+        /></li>
       ))}
-    </div>
+    </ol>
   </section>
 
 <style>

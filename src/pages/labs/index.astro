@@ -3,13 +3,12 @@ import RaceLayout from '../../layouts/RaceLayout.astro';
 import { getCollection } from 'astro:content';
 import LogRow from '../../components/race/LogRow.astro';
 import { previewImage } from '../../lib/preview';
+import { monthYear } from '../../lib/date';
 
 const labs = (await getCollection('labs'))
   .filter((l) => !l.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const fmt = (d: Date) =>
-  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
 ---
 
 <RaceLayout
@@ -31,18 +30,18 @@ const fmt = (d: Date) =>
   </section>
 
   <section class="band on-snow tight">
-    <div class="rows">
+    <ol class="rows" role="list">
       {labs.map((l, i) => (
-        <LogRow
+        <li><LogRow
           n={String(i + 1).padStart(3, '0')}
           title={l.data.title}
-          meta={`${l.data.stack.slice(0, 3).join(' · ')} · ${fmt(l.data.date)}`}
+          meta={`${l.data.stack.slice(0, 3).join(' · ')} · ${monthYear(l.data.date)}`}
           href={`/labs/${l.id}/`}
           figure={l.data.figure ?? l.data.status}
           image={previewImage(l)}
-        />
+        /></li>
       ))}
-    </div>
+    </ol>
   </section>
 
 <style>

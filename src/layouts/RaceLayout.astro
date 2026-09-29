@@ -41,6 +41,7 @@ const path = Astro.url.pathname;
 </head>
 <body class={ground === 'night' ? 'on-night' : 'on-snow'}>
 
+  <a class="skip" href="#main">Skip to content</a>
   <div class="pacebar" aria-hidden="true"></div>
 
   <header class={`dochead ${ground === 'night' ? 'on-night' : 'on-snow'}`}>
@@ -55,7 +56,7 @@ const path = Astro.url.pathname;
     </div>
   </header>
 
-  <main>
+  <main id="main" tabindex="-1">
     <slot />
   </main>
 
@@ -157,8 +158,10 @@ const path = Astro.url.pathname;
     display: flex; flex-wrap: wrap; gap: var(--s3) var(--s8); align-items: baseline;
   }
   .docfoot__links { display: flex; gap: var(--s6); margin-left: auto; }
+  /* Links, so they get the header's size, not the 10px registry size of
+     the address and coordinates beside them. */
   .docfoot__links a {
-    font-family: var(--f-mono); font-size: var(--t-10); letter-spacing: var(--tr-mono);
+    font-family: var(--f-mono); font-size: var(--t-12); letter-spacing: var(--tr-mono-t);
     text-transform: uppercase; color: var(--fg-dim);
   }
   @media (max-width: 640px) {

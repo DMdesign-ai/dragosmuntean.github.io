@@ -3,13 +3,12 @@ import RaceLayout from '../../layouts/RaceLayout.astro';
 import { getCollection } from 'astro:content';
 import LogRow from '../../components/race/LogRow.astro';
 import { previewImage } from '../../lib/preview';
+import { monthYear } from '../../lib/date';
 
 const projects = (await getCollection('projects'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const fmt = (d: Date) =>
-  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase();
 ---
 
 <RaceLayout title="Work — Dragos Muntean" ground="snow" doc="DOC RD-01 / WORK">
@@ -45,18 +44,18 @@ const fmt = (d: Date) =>
   </section>
 
   <section class="band on-snow tight">
-    <div class="rows">
+    <ol class="rows" role="list">
       {projects.map((p, i) => (
-        <LogRow
+        <li><LogRow
           n={String(i + 1).padStart(3, '0')}
           title={p.data.title}
-          meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
+          meta={`${p.data.company} · ${p.data.role} · ${monthYear(p.data.date)}`}
           href={`/work/${p.id}/`}
           figure={p.data.figure ?? 'Case study'}
           image={previewImage(p)}
-        />
+        /></li>
       ))}
-    </div>
+    </ol>
   </section>
 
 <style>

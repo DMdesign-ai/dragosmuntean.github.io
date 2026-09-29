@@ -59,7 +59,7 @@
   --snow-rule:    #D8DBD1;
   --ink:          #12150F;
   --ink-dim:      #5E645A;
-  --ink-faint:    #676D62;  /* AA 4.87:1 on snow  — carries 10px registry text */
+  --ink-faint:    #62685D;  /* AA 5.25:1 on snow, 4.79:1 on snow-raise (hovered rows) */
 
   /* --- the one accent ---
      hi-vis lime, pushed green. On night it may set text. On snow it is a FILL
@@ -139,6 +139,7 @@
   --now-fg:  var(--hivis);
   --now-pad: 0;
   --img-edge: oklch(1 0 0 / 0.1);  /* pure white, never a tinted neutral */
+  --focus: var(--hivis);           /* 12.4:1 on night */
   background: var(--ground);
   color: var(--fg);
 }
@@ -155,6 +156,7 @@
   --now-fg:  var(--hivis-ink);
   --now-pad: 0 var(--s1);
   --img-edge: oklch(0 0 0 / 0.1);  /* pure black, never a tinted neutral */
+  --focus: var(--ink);             /* lime is 1.4:1 on snow — invisible as a ring */
   background: var(--ground);
   color: var(--fg);
 }
@@ -193,9 +195,21 @@ h1, h2, h3, h4 {
 p { margin: 0; max-width: var(--measure); }
 
 :focus-visible {
-  outline: 2px solid var(--hivis);
+  outline: 2px solid var(--focus, var(--hivis));
   outline-offset: 3px;
 }
+
+/* Skip link: first thing a keyboard reaches, invisible until it is. */
+.skip {
+  position: absolute; z-index: 60; inset-inline-start: var(--s4); top: var(--s2);
+  padding: var(--s3) var(--s4);
+  background: var(--hivis); color: var(--hivis-ink);
+  font-family: var(--f-mono); font-size: var(--t-12);
+  letter-spacing: var(--tr-mono-t); text-transform: uppercase; text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; outline-color: var(--hivis-ink); outline-offset: -4px; }
+main:focus { outline: none; }  /* focused only as the skip target, never by the user */
 
 ::selection { background: var(--hivis); color: var(--hivis-ink); }
 
@@ -263,7 +277,10 @@ p { margin: 0; max-width: var(--measure); }
   display: inline-block;
 }
 
-/* --- Log row: one dated entry. Number, title, figure. --- */
+/* --- Log row: one dated entry. Number, title, figure.
+       Rows sit in an <ol class="rows" role="list">, so screen readers
+       announce the count; the list styling is ours, not the browser's. --- */
+ol.rows { list-style: none; margin-block: 0; padding-inline-start: 0; }
 .logrow {
   display: grid;
   grid-template-columns: 3.5rem minmax(0, 1fr) auto;
@@ -276,6 +293,13 @@ p { margin: 0; max-width: var(--measure); }
   transition: background var(--dur-fast) var(--ease);
 }
 .logrow:hover { background: var(--raise); }
+/* Phones: a figure like "43 commits, 4 rewrites" would squeeze the title
+   column to ~110px and wrap the meta line six times. Drop it under the meta. */
+@media (max-width: 40rem) {
+  .logrow { grid-template-columns: 2.5rem minmax(0, 1fr); row-gap: var(--s2); }
+  .logrow > .logrow__fig,
+  .logrow > .tag-nda { grid-column: 2; justify-self: start; }
+}
 .logrow__n,
 .logrow__fig {
   font-family: var(--f-mono);
@@ -294,20 +318,27 @@ p { margin: 0; max-width: var(--measure); }
 .logrow__meta {
   display: block;
   font-family: var(--f-mono);
-  font-size: var(--t-10);
-  letter-spacing: var(--tr-mono);
+  font-size: var(--t-12);        /* real content — role, stack, date — so not registry size */
+  letter-spacing: var(--tr-mono-t);
   text-transform: uppercase;
   color: var(--fg-faint);
   margin-top: var(--s1);
 }
 
-/* --- Row preview: on hover the row opens and shows the first image from the
-       entry. grid-template-rows 0fr -> 1fr animates cleanly without touching
-       height, and a transition (not keyframes) means moving the pointer away
-       mid-open reverses smoothly instead of restarting.
+/* --- Row preview: hovering a row shows the first image from the entry.
+
+       Wide screens with a mouse: the thumbnail floats in the empty end of the
+       title column and the row never changes height. An earlier version grew
+       the row to fit it, which pushed every row below down; moving the pointer
+       down the list then collapsed that row and pulled the rest back up under
+       the cursor, so the highlight jumped to the wrong entry.
+
+       Everywhere else it opens in flow, grid-template-rows 0fr -> 1fr, which
+       animates without touching height. Transitions, not keyframes, so leaving
+       mid-open reverses instead of restarting.
        Rows with no image never get .logrow--peek, so they simply don't open. */
+.logrow__body { display: block; min-width: 0; }
 .logrow--peek .logrow__peek {
-  grid-column: 2 / -1;
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows var(--dur) var(--ease);
@@ -334,6 +365,25 @@ p { margin: 0; max-width: var(--measure); }
 }
 .logrow--peek:hover .logrow__peek img,
 .logrow--peek:focus-visible .logrow__peek img { opacity: 1; transform: none; }
+
+@media (hover: hover) and (min-width: 64rem) {
+  .logrow--peek .logrow__body { position: relative; }
+  .logrow--peek .logrow__peek {
+    display: block;
+    position: absolute; z-index: 2;
+    inset-inline-end: 0; top: 50%;
+    width: 14rem;
+    translate: 0 -50%;
+    pointer-events: none;      /* never steals the hover from the rows it overlaps */
+  }
+  .logrow--peek .logrow__peek > span { overflow: visible; }
+  .logrow__peek img {
+    width: 100%; margin-top: 0;
+    box-shadow: 0 12px 32px -12px oklch(0 0 0 / 0.35);
+    transform: translateY(4px) scale(0.98);
+    transition: opacity var(--dur-fast) var(--ease), transform var(--dur) var(--ease);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .logrow--peek .logrow__peek { transition: none; }
