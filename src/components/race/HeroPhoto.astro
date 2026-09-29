@@ -99,7 +99,10 @@ const NAME2 = 'MUNTEAN'.split('');
   const conn = (navigator as any).connection;
   const lowEnd =
     conn?.saveData === true ||
-    /(^|-)2g$/.test(conn?.effectiveType ?? '') ||
+    // 3g as well as 2g: the terrain is ~1.5 MB and detail-height.webp alone is
+    // 1 MB — fine on wifi, painful on a slow connection that never sets
+    // saveData. effectiveType is 'slow-2g' | '2g' | '3g' | '4g'.
+    /(^|-)[23]g$/.test(conn?.effectiveType ?? '') ||
     ((navigator as any).deviceMemory ?? 8) <= 2 ||
     (navigator.hardwareConcurrency ?? 8) <= 2;
   const hasWebGL2 = (() => {
