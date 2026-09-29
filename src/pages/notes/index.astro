@@ -32,7 +32,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {notes.map((n, i) => (
         <LogRow
-          n={String(notes.length - i).padStart(3, '0')}
+          n={String(i + 1).padStart(3, '0')}
           title={n.data.title}
           meta={[n.data.platform, ...n.data.tags.slice(0, 3)].filter(Boolean).join(' · ')}
           href={`/notes/${n.id}/`}

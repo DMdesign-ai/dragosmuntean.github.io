@@ -34,7 +34,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {labs.map((l, i) => (
         <LogRow
-          n={String(labs.length - i).padStart(3, '0')}
+          n={String(i + 1).padStart(3, '0')}
           title={l.data.title}
           meta={`${l.data.stack.slice(0, 3).join(' · ')} · ${fmt(l.data.date)}`}
           href={`/labs/${l.id}/`}

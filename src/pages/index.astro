@@ -59,7 +59,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {/* Current role leads the timeline — it is the most recent entry. */}
       <LogRow
-        n={String(projects.length + 1).padStart(3, '0')}
+        n={'001'}
         title="TWINT"
         meta="Product designer · Swiss payments · 2025 —"
         tag="Under NDA"
@@ -69,7 +69,7 @@ const fmt = (d: Date) =>
 
       {projects.map((p, i) => (
         <LogRow
-          n={String(projects.length - i).padStart(3, '0')}
+          n={String(i + 2).padStart(3, '0')}
           title={p.data.title}
           meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
           href={`/work/${p.id}/`}
@@ -96,7 +96,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {recent.map((e, i) => (
         <LogRow
-          n={String(e.n).padStart(3, '0')}
+          n={String(i + 1).padStart(3, '0')}
           title={e.title}
           meta={e.meta}
           href={e.href}
@@ -122,7 +122,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {latestNotes.map((n, i) => (
         <LogRow
-          n={String(latestNotes.length - i).padStart(3, '0')}
+          n={String(i + 1).padStart(3, '0')}
           title={n.data.title}
           meta={[n.data.platform, ...n.data.tags.slice(0, 3)].filter(Boolean).join(' · ')}
           href={`/notes/${n.id}/`}

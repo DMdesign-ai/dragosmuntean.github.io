@@ -48,7 +48,7 @@ const fmt = (d: Date) =>
     <div class="rows">
       {projects.map((p, i) => (
         <LogRow
-          n={String(projects.length - i).padStart(3, '0')}
+          n={String(i + 1).padStart(3, '0')}
           title={p.data.title}
           meta={`${p.data.company} · ${p.data.role} · ${fmt(p.data.date)}`}
           href={`/work/${p.id}/`}
